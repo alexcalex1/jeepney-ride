@@ -6,7 +6,8 @@ Drive a jeepney through real Google Street View — start in **Urdaneta, Pangasi
 
 - ▲ GAS / ▼ BRAKE change gear, ◀ ▶ are turn signals (the jeepney turns at the next junction on that side), ↶ U-turn, tap the steering wheel to honk.
 - Pasahero mode: passengers wave, stop to pick them up, stop again on “Para po!” to collect the fare.
-- Tap the round map to see all Street View roads (blue) and where you've driven (yellow), and to jump to any road.
+- 🎥 / 🚐 switches between the **chase camera** (3D jeepney seen from behind) and the **cab view**.
+- Tap the map to see all Street View roads (blue) and where you've driven (yellow), and to jump to any road.
 
 ## API key
 

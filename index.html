@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#3a0a0a">
 <title>Jeepney Ride · Street View</title>
+<script type="importmap">
+{"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js",
+            "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}
+</script>
 <style>
 :root{
   --roof-h: calc(52px + env(safe-area-inset-top));
@@ -30,7 +34,7 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
     repeating-linear-gradient(80deg,transparent 0 46px,rgba(255,255,255,.13) 46px 48px) right top/24% 100% no-repeat;
   animation:streak .45s linear infinite}
 #photo{position:fixed;left:0;right:0;top:0;bottom:calc(var(--dash-h) + var(--hood-h));overflow:hidden;background:#1f2937;touch-action:none}
-#photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .35s;
+#photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .25s;
   transform-origin:50% 55%;-webkit-user-drag:none;pointer-events:none}
 #photo img.top{opacity:1}
 #photo .attr{position:absolute;left:6px;bottom:4px;font-size:11px;color:#fff;text-shadow:0 1px 3px #000;z-index:2}
@@ -49,9 +53,21 @@ body.sk #roof{background:linear-gradient(#0f2a5b,#071633)}
   box-shadow:0 0 0 3px rgba(0,0,0,.25),0 0 14px rgba(255,255,200,.35);white-space:nowrap;max-width:62vw;
   overflow:hidden;text-overflow:ellipsis}
 body.sk #sign{color:#1d4ed8}
-.roofbtn{position:absolute;top:calc(env(safe-area-inset-top) + 6px);width:40px;height:40px;border-radius:10px;
-  background:rgba(255,255,255,.12);font-size:20px;display:grid;place-items:center}
-#menuBtn{left:8px}
+.roofbtn{position:fixed;top:calc(env(safe-area-inset-top) + 6px);width:40px;height:40px;border-radius:10px;z-index:9;
+  background:rgba(255,255,255,.14);font-size:20px;display:grid;place-items:center}
+#menuBtn{left:8px} #viewBtn{right:8px}
+body.chase .roofbtn{background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.2)}
+
+/* ---------- Chase view (3D jeepney from behind) ---------- */
+#car3d{position:fixed;left:0;top:0;width:100%;height:calc(100% - var(--dash-h));z-index:2;pointer-events:none;display:none}
+body.chase #car3d{display:block}
+body.chase #roof,body.chase #mirror,body.chase #hood,body.chase #pillarL,body.chase #pillarR{display:none}
+body.chase #sv,body.chase #photo{bottom:var(--dash-h)}
+body.chase #hud,body.chase #mapWrap{top:calc(env(safe-area-inset-top) + 56px)}
+body.chase #speedfx{top:calc(env(safe-area-inset-top) + 56px);bottom:calc(var(--dash-h) + 40px)}
+body.chase #banner{bottom:calc(var(--dash-h) + 0.47*(100vh - var(--dash-h)))}
+body.chase #toast{top:calc(env(safe-area-inset-top) + 196px)}
+@media (orientation:landscape){ body.chase #banner{bottom:auto;top:calc(env(safe-area-inset-top) + 10px)} body.chase #toast{top:calc(env(safe-area-inset-top) + 64px)} }
 #lamp1,#lamp2{position:absolute;top:calc(env(safe-area-inset-top) + 18px);width:12px;height:12px;border-radius:50%;
   background:radial-gradient(#fff7ad,#f59e0b);box-shadow:0 0 10px #fbbf24}
 #lamp1{left:calc(50% - 34vw)} #lamp2{right:calc(50% - 34vw)}
@@ -215,10 +231,12 @@ kbd{background:#1e293b;border:1px solid #475569;border-radius:5px;padding:0 5px;
 <div id="sv"></div>
 <div id="photo" hidden><img alt=""><img alt=""><span class="attr">Imagery © Google</span></div>
 <div id="speedfx"></div>
+<canvas id="car3d"></canvas>
+<button id="menuBtn" class="roofbtn" aria-label="Menu">☰</button>
+<button id="viewBtn" class="roofbtn" aria-label="Switch camera">🎥</button>
 
 <!-- Cab overlay -->
 <div id="roof">
-  <button id="menuBtn" class="roofbtn" aria-label="Menu">☰</button>
   <span id="lamp1"></span><div id="sign">URDANETA ⇄ DAGUPAN</div><span id="lamp2"></span>
 </div>
 <div id="pillarL"></div><div id="pillarR"></div>
@@ -276,10 +294,13 @@ kbd{background:#1e293b;border:1px solid #475569;border-radius:5px;padding:0 5px;
   <div class="col left">
     <button id="wheelBtn" aria-label="Horn">
       <svg viewBox="0 0 120 120">
+        <defs><linearGradient id="chromeW" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#ffffff"/><stop offset=".35" stop-color="#94a3b8"/>
+          <stop offset=".55" stop-color="#f8fafc"/><stop offset="1" stop-color="#475569"/></linearGradient></defs>
         <circle cx="60" cy="60" r="50" fill="none" stroke="#1c1412" stroke-width="13"/>
         <circle cx="60" cy="60" r="50" fill="none" stroke="#57534e" stroke-width="2"/>
         <path d="M60 60L60 110M60 60L16 38M60 60L104 38" stroke="#1c1412" stroke-width="11" stroke-linecap="round"/>
-        <circle cx="60" cy="60" r="20" fill="url(#chromeG)" stroke="#1c1412" stroke-width="3"/>
+        <circle cx="60" cy="60" r="20" fill="url(#chromeW)" stroke="#1c1412" stroke-width="3"/>
         <text x="60" y="64" text-anchor="middle" font-size="10" font-weight="900" fill="#7f1d1d">BEEP</text>
       </svg>
     </button>
@@ -360,7 +381,8 @@ kbd{background:#1e293b;border:1px solid #475569;border-radius:5px;padding:0 5px;
     <h2>3 · Options</h2>
     <label class="opt"><input type="checkbox" id="optPass" checked> Pasahero mode – passengers wave, you stop, they pay</label>
     <label class="opt"><input type="checkbox" id="optSound" checked> Sound (diesel engine, horn, voices)</label>
-    <label class="opt"><input type="checkbox" id="optZoom"> Motion effect (camera pushes forward between photos)</label>
+    <label class="opt"><input type="checkbox" id="optChase" checked> 🎥 Chase camera – see your 3D jeepney from behind (switch any time with 🎥 / 🚐)</label>
+    <label class="opt"><input type="checkbox" id="optZoom"> Motion effect for the interactive view (camera pushes forward between photos)</label>
     <label class="opt"><input type="checkbox" id="optPhoto"> 📷 Photo mode – use if the street view stays black (needs Street View Static API)</label>
   </div>
 
@@ -489,7 +511,7 @@ const money = v => { const L = LOC(); return L.cur + v.toFixed(L.dec); };
 const GEAR_MS = [0, 1500, 950, 620, 400];
 const S = {
   key: store.get('jeep.key', ''),
-  settings: Object.assign({loc:'pangasinan', passengers:true, sound:true, zoomFx:false, photo:false}, store.get('jeep.settings', {})),
+  settings: Object.assign({loc:'pangasinan', passengers:true, sound:true, zoomFx:false, photo:false, view:'chase'}, store.get('jeep.settings', {})),
   started:false, menuOpen:false,
   gear:0, blinker:null, blinkHops:0, busy:false, waitingTurn:null,
   travelHeading:0, lookOffset:0, userLooking:false,
@@ -696,8 +718,12 @@ function setPanoAndWait(id){
 
 function applyPov(){
   if (!pano) return;
-  pano.setPov({heading: norm(S.travelHeading + S.lookOffset), pitch: 0});
+  pano.setPov({heading: norm(S.travelHeading + S.lookOffset), pitch: viewPitch()});
 }
+// camera geometry shared by the street image and the 3D jeepney
+const CHASE_PITCH = -10;
+const viewPitch = () => S.settings.view === 'chase' ? CHASE_PITCH : 0;
+const viewHFov = ar => S.settings.photo ? (ar >= 1 ? 100 : 80) : 90;
 
 function computeBaseZoom(){
   S.baseZoom = 1;      // whole-number zoom: safest for every Street View renderer
@@ -709,9 +735,17 @@ let photoFront = 0;
 function photoUrl(id, heading){
   const el = $('#photo'), w = Math.max(1, el.clientWidth), h = Math.max(1, el.clientHeight), ar = w/h;
   let W, H; if (ar >= 1){ W = 640; H = Math.max(200, Math.round(640/ar)); } else { H = 640; W = Math.max(200, Math.round(640*ar)); }
-  const fov = ar >= 1 ? 100 : 80;
   return 'https://maps.googleapis.com/maps/api/streetview?size=' + W + 'x' + H + '&pano=' + encodeURIComponent(id) +
-         '&heading=' + heading.toFixed(1) + '&pitch=0&fov=' + fov + '&return_error_code=true&key=' + encodeURIComponent(S.key);
+         '&heading=' + heading.toFixed(1) + '&pitch=' + viewPitch() + '&fov=' + viewHFov(ar) + '&return_error_code=true&key=' + encodeURIComponent(S.key);
+}
+// load the photo for the road ahead before we get there, so the next hop swaps instantly
+function prefetchNext(){
+  if (!S.settings.photo || !pano || S.gear === 0) return;
+  const res = chooseLink(pano.getLinks() || []);
+  if (!res.link) return;
+  const url = photoUrl(res.link.pano, norm(res.link.heading));
+  if (prefetchNext.last === url) return;
+  prefetchNext.last = url; prefetchNext.img = new Image(); prefetchNext.img.src = url;
 }
 function showPhoto(){
   if (!S.settings.photo || !pano || !pano.getPano()) return;
@@ -845,7 +879,7 @@ function onArrive(){
   S.trail[S.trail.length - 1].push([+pos.lat.toFixed(5), +pos.lng.toFixed(5)]);
   if (curLine) curLine.getPath().push(new google.maps.LatLng(pos.lat, pos.lng));
   updatePlayer();
-  showPhoto();
+  showPhoto(); prefetchNext();
   if (!bigOpen && map) map.panTo(pos);
   bump();
   checkGoals();
@@ -860,14 +894,15 @@ function fxLoop(){
   const now = performance.now();
   if (now - S.lastFx < 50) return;
   S.lastFx = now;
-  const moving = S.settings.zoomFx && S.gear > 0 && !S.waitingTurn && !paused();
+  const moving = S.gear > 0 && !S.waitingTurn && !paused();
   if (S.settings.photo){
+    // photo mode: the picture glides forward until the next one cross-fades in
     const img = $('#photo img.top');
-    if (img){ const ph = moving ? Math.min(1, (now - (S.photoT || now))/GEAR_MS[S.gear]) : 0;
-              img.style.transform = `scale(${(1 + ph*(0.05 + 0.03*S.gear)).toFixed(3)})`; }
+    if (img){ const ph = moving ? Math.min(1.15, (now - (S.photoT || now))/GEAR_MS[S.gear]) : 0;
+              img.style.transform = `scale(${(1 + ph*(0.06 + 0.035*S.gear)).toFixed(3)})`; }
   } else {
     let z = S.baseZoom;
-    if (moving) z += Math.min(1, (now - S.lastArriveT)/GEAR_MS[S.gear])*(0.06 + 0.035*S.gear);
+    if (moving && S.settings.zoomFx) z += Math.min(1, (now - S.lastArriveT)/GEAR_MS[S.gear])*(0.06 + 0.035*S.gear);
     if (Math.abs(z - S.curZoom) > 0.004){ S.curZoom = z; pano.setZoom(z); }
   }
   // speed decay when stuck/stopped
@@ -878,6 +913,7 @@ function fxLoop(){
 function setGear(n){
   n = Math.max(0, Math.min(4, n));
   const prev = S.gear; S.gear = n;
+  if (n < prev) CH.brakeT = performance.now();
   if (prev > 0 && n === 0) onStopped();
   if (prev === 0 && n > 0){ S.lastArriveT = performance.now(); schedule(GEAR_MS[n]*0.6); }
   $('#speedfx').style.opacity = n ? (0.25 + n*0.15) : 0;
@@ -903,10 +939,12 @@ function uTurn(){
   turnWheel(180); applyPov(); showPhoto(); updateBanner(); schedule(300);
 }
 function turnWheel(a){
+  chaseTurn(a);
   const w = $('#wheelBtn'); w.style.transform = `rotate(${Math.max(-120, Math.min(120, a))}deg)`;
   clearTimeout(turnWheel.t); turnWheel.t = setTimeout(() => w.style.transform = '', 650);
 }
 function bump(){
+  CH.bump = 1;
   for (const id of ['#hood', '#dash']){ const el = $(id); el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }
 }
 
@@ -1071,6 +1109,248 @@ function renderSheet(){
   });
 }
 
+/* =====================================================================
+   Chase view – a 3D jeepney (three.js) drawn over the street image
+   ===================================================================== */
+const CH = { ready:false, loading:null, yaw:0, bump:0, wheelRot:0, brakeT:0, lastT:0, smokeT:0, puffs:[] };
+const CAM_H = 3.1;                                   // virtual chase-camera height (m)
+const THEMES = {
+  ph:{ paint:0xd3d7de, roof:0xb91c1c, s1:0xd62828, s2:0xfcbf49, s3:0x1d4ed8, css:['#d62828','#fcbf49','#1d4ed8'],
+       bg:['#f1f5f9','#9aa3b2'], name:['BIYAHENG','DAGAT'], small:['GOD BLESS','OUR TRIP'], sign:'DAGUPAN  •  URDANETA', signColor:'#b91c1c' },
+  sk:{ paint:0xf4f6f9, roof:0x1d4ed8, s1:0x1d4ed8, s2:0xffffff, s3:0xd62828, css:['#1d4ed8','#ffffff','#d62828'],
+       bg:['#ffffff','#c9d2de'], name:['IŽA','EXPRESS'], small:['ŠŤASTNÚ','CESTU'], sign:'KOMÁRNO  •  IŽA', signColor:'#1d4ed8' }
+};
+
+async function loadChase(){
+  if (CH.ready) return true;
+  if (!CH.loading) CH.loading = (async () => {
+    const T = await import('three');
+    let RoomEnvironment = null;
+    try{ ({RoomEnvironment} = await import('three/addons/environments/RoomEnvironment.js')); }catch(e){}
+    buildChase(T, RoomEnvironment); CH.ready = true; return true;
+  })().catch(e => { console.warn('3D jeepney failed to load', e); CH.loading = null; return false; });
+  return CH.loading;
+}
+
+function canvasTex(T, w, h, draw){
+  const c = document.createElement('canvas'); c.width = w; c.height = h; draw(c.getContext('2d'), w, h);
+  const t = new T.CanvasTexture(c); t.colorSpace = T.SRGBColorSpace; t.anisotropy = 4; t.userData.canvas = c; t.userData.draw = draw; return t;
+}
+
+function buildChase(T, RoomEnvironment){
+  CH.T = T;
+  const r = new T.WebGLRenderer({canvas:$('#car3d'), alpha:true, antialias:true, powerPreference:'high-performance'});
+  r.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  r.outputColorSpace = T.SRGBColorSpace; r.toneMapping = T.ACESFilmicToneMapping; r.toneMappingExposure = 1.0;
+  const scene = new T.Scene();
+  if (RoomEnvironment){ const pm = new T.PMREMGenerator(r); scene.environment = pm.fromScene(new RoomEnvironment(), 0.04).texture; }
+  scene.add(new T.HemisphereLight(0xe8f2ff, 0x5b4a38, 1.0));
+  const sun = new T.DirectionalLight(0xfff6e5, 2.2); sun.position.set(-5, 12, 4); scene.add(sun);
+  const cam = new T.PerspectiveCamera(70, 1, 0.1, 400);
+  cam.rotation.order = 'YXZ'; cam.position.set(0, CAM_H, 0);
+  CH.renderer = r; CH.scene = scene; CH.cam = cam;
+  CH.car = buildJeepney(T); scene.add(CH.car);
+  // exhaust puffs
+  const puffTex = canvasTex(T, 64, 64, (g, w) => { const gr = g.createRadialGradient(32, 32, 2, 32, 32, 30);
+    gr.addColorStop(0, 'rgba(210,210,210,1)'); gr.addColorStop(1, 'rgba(210,210,210,0)'); g.fillStyle = gr; g.fillRect(0, 0, w, w); });
+  for (let i = 0; i < 22; i++){
+    const sp = new T.Sprite(new T.SpriteMaterial({map:puffTex, transparent:true, depthWrite:false, opacity:0}));
+    sp.visible = false; scene.add(sp); CH.puffs.push({sp, life:9, v:new T.Vector3()});
+  }
+  resizeChase();
+}
+
+function drawRear(g, w, h){
+  const th = THEMES[LOC().cls];
+  const bg = g.createLinearGradient(0, 0, 0, h); bg.addColorStop(0, th.bg[0]); bg.addColorStop(1, th.bg[1]);
+  g.fillStyle = bg; g.fillRect(0, 0, w, h);
+  const bands = (y0) => { th.css.forEach((c, i) => { g.fillStyle = c; g.fillRect(0, y0 + i*16, w, 13); }); };
+  bands(14); bands(h - 62);
+  // doorway
+  const dx0 = w*0.33, dx1 = w*0.67;
+  const dg = g.createLinearGradient(dx0, 0, dx1, 0); dg.addColorStop(0, '#000'); dg.addColorStop(.5, '#1a1410'); dg.addColorStop(1, '#000');
+  g.fillStyle = dg; g.fillRect(dx0, 0, dx1 - dx0, h);
+  g.fillStyle = '#3b2416'; g.fillRect(dx0 + 10, h*0.38, 40, h*0.42); g.fillRect(dx1 - 50, h*0.38, 40, h*0.42);   // benches inside
+  // lettering
+  g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineJoin = 'round';
+  const word = (txt, cx, cy, size, fill, stroke) => {
+    let s = size; g.font = `900 ${s}px "Arial Black", Impact, sans-serif`;
+    while (g.measureText(txt).width > w*0.25 && s > 20){ s -= 2; g.font = `900 ${s}px "Arial Black", Impact, sans-serif`; }
+    g.lineWidth = s*0.16; g.strokeStyle = stroke; g.strokeText(txt, cx, cy); g.fillStyle = fill; g.fillText(txt, cx, cy);
+  };
+  word(th.name[0], w*0.155, h*0.42, 86, th.css[0] === '#ffffff' ? '#1d4ed8' : th.css[0], '#ffffff');
+  word(th.name[1], w*0.845, h*0.42, 86, th.css[2], '#ffffff');
+  g.font = 'italic 700 34px Georgia, serif'; g.fillStyle = '#1f2937';
+  g.fillText(th.small[0], w*0.155, h*0.22); g.fillText(th.small[1], w*0.845, h*0.22);
+}
+function drawSign(g, w, h){
+  const th = THEMES[LOC().cls];
+  g.fillStyle = '#fbfbf7'; g.fillRect(0, 0, w, h); g.strokeStyle = '#64748b'; g.lineWidth = 6; g.strokeRect(3, 3, w - 6, h - 6);
+  g.fillStyle = th.signColor; g.textAlign = 'center'; g.textBaseline = 'middle';
+  let s = 58; g.font = `900 ${s}px "Arial Black", Impact, sans-serif`;
+  while (g.measureText(th.sign).width > w - 40 && s > 20){ s -= 2; g.font = `900 ${s}px "Arial Black", Impact, sans-serif`; }
+  g.fillText(th.sign, w/2, h/2 + 2);
+}
+
+function buildJeepney(T){
+  const std = o => new T.MeshStandardMaterial(o);
+  const M = CH.mats = {
+    paint: std({color:0xd3d7de, metalness:0.6, roughness:0.3}),
+    roof:  std({color:0xb91c1c, metalness:0.35, roughness:0.4}),
+    s1: std({color:0xd62828, roughness:0.4}), s2: std({color:0xfcbf49, roughness:0.4}), s3: std({color:0x1d4ed8, roughness:0.4}),
+    chrome: std({color:0xffffff, metalness:1, roughness:0.1}),
+    dark: std({color:0x09090b, roughness:0.85}),
+    seat: std({color:0x3b2416, roughness:0.7}),
+    glass: std({color:0x0f172a, metalness:0.7, roughness:0.06}),
+    tire: std({color:0x141414, roughness:0.95}),
+    tail: std({color:0x7f1d1d, emissive:0xff1a1a, emissiveIntensity:0.6}),
+    blinkL: std({color:0x7c2d12, emissive:0xff8c00, emissiveIntensity:0}),
+    blinkR: std({color:0x7c2d12, emissive:0xff8c00, emissiveIntensity:0})
+  };
+  CH.rearTex = canvasTex(T, 1024, 488, drawRear);
+  CH.signTex = canvasTex(T, 512, 96, drawSign);
+  M.rear = std({map:CH.rearTex, metalness:0.35, roughness:0.38});
+  M.sign = std({map:CH.signTex, emissive:0xffffff, emissiveMap:CH.signTex, emissiveIntensity:0.35, roughness:0.5});
+
+  const car = new T.Group(), body = new T.Group(); car.add(body); CH.body = body;
+  const box = (w, h, d, m, x, y, z, p = body) => { const o = new T.Mesh(new T.BoxGeometry(w, h, d), m); o.position.set(x, y, z); p.add(o); return o; };
+  const cyl = (rt, rb, h, m, x, y, z, p = body, seg = 14) => { const o = new T.Mesh(new T.CylinderGeometry(rt, rb, h, seg), m); o.position.set(x, y, z); p.add(o); return o; };
+
+  // chassis & passenger body (front is −z, rear faces the camera at +z)
+  box(1.8, 0.3, 6.0, M.dark, 0, 0.55, 0.3);
+  box(2.0, 0.95, 3.9, M.paint, 0, 1.2, 1.3);
+  box(1.9, 0.62, 3.8, M.dark, 0, 1.98, 1.3);                       // open-window interior
+  for (const sx of [-1, 1]){
+    box(0.02, 0.09, 3.9, M.s1, sx*1.005, 0.92, 1.3);
+    box(0.02, 0.06, 3.9, M.s2, sx*1.005, 1.03, 1.3);
+    box(0.02, 0.05, 3.9, M.s3, sx*1.005, 1.12, 1.3);
+    box(0.03, 0.04, 3.9, M.chrome, sx*1.01, 1.69, 1.3);
+    for (let i = 0; i < 6; i++) box(0.07, 0.62, 0.08, M.paint, sx*0.97, 1.98, -0.6 + i*0.76);
+    box(0.42, 0.45, 0.02, M.dark, sx*0.82, 0.36, 2.78);             // mud flaps
+    const tl = box(0.2, 0.14, 0.05, M.tail, sx*0.82, 0.95, 3.29);   // tail lights
+    box(0.2, 0.08, 0.05, sx < 0 ? M.blinkL : M.blinkR, sx*0.82, 1.1, 3.29);
+    box(0.24, 0.03, 0.06, M.chrome, sx*0.82, 1.18, 3.29);
+  }
+  // rear: painted panel with the doorway, open window band, chrome step, bumper, grab bars
+  box(2.0, 0.95, 0.04, M.rear, 0, 1.2, 3.27);
+  for (const x of [-0.98, -0.36, 0.36, 0.98]) box(0.06, 0.62, 0.05, M.paint, x, 1.98, 3.27);
+  for (const x of [-0.37, 0.37]) cyl(0.025, 0.025, 1.55, M.chrome, x, 1.48, 3.34);
+  box(0.74, 0.05, 0.34, M.chrome, 0, 0.66, 3.42);
+  box(2.1, 0.13, 0.14, M.chrome, 0, 0.48, 3.33);
+  const pipe = cyl(0.05, 0.05, 0.32, M.chrome, -0.6, 0.36, 3.2); pipe.rotation.x = Math.PI/2;
+  // roof, trim, rack, route sign
+  box(2.16, 0.1, 4.55, M.roof, 0, 2.34, 1.02);
+  box(2.18, 0.04, 4.57, M.chrome, 0, 2.28, 1.02);
+  for (const sx of [-1, 1]){ box(0.04, 0.04, 4.3, M.chrome, sx*0.98, 2.52, 1.02);
+    for (let i = 0; i < 5; i++) cyl(0.015, 0.015, 0.14, M.chrome, sx*0.98, 2.45, -0.95 + i*1.0); }
+  for (let i = 0; i < 4; i++) box(1.96, 0.03, 0.04, M.chrome, 0, 2.52, -0.7 + i*1.2);
+  box(1.66, 0.3, 0.07, M.chrome, 0, 2.6, 3.27);
+  box(1.6, 0.25, 0.05, M.sign, 0, 2.6, 3.31);
+  // front cab: hood, grille, windshield, mirrors, antennas with pennants, hood horses
+  box(1.75, 0.5, 1.75, M.paint, 0, 1.0, -1.55);
+  box(0.24, 0.012, 1.75, M.s1, 0, 1.256, -1.55);
+  box(1.5, 0.45, 0.05, M.chrome, 0, 0.98, -2.44);
+  const ws = box(1.8, 0.62, 0.05, M.glass, 0, 1.98, -0.66); ws.rotation.x = -0.14;
+  for (const sx of [-1, 1]){
+    box(0.05, 0.62, 0.5, M.paint, sx*0.97, 1.98, -0.92);
+    cyl(0.012, 0.012, 0.3, M.chrome, sx*1.08, 1.85, -0.75).rotation.z = Math.PI/2;
+    box(0.06, 0.24, 0.16, M.chrome, sx*1.24, 1.88, -0.75);
+    cyl(0.008, 0.008, 1.7, M.chrome, sx*0.8, 2.1, -2.2);
+    box(0.24, 0.14, 0.006, sx < 0 ? M.s1 : M.s3, sx*0.8 + sx*0.12, 2.86, -2.2);
+    const horse = cyl(0.02, 0.07, 0.26, M.chrome, sx*0.22, 1.39, -2.25, body, 8); horse.rotation.x = -0.4;
+    cyl(0.045, 0.03, 0.12, M.chrome, sx*0.22, 1.53, -2.33, body, 8).rotation.x = 0.9;
+  }
+  // wheels (on the car group so the body can bounce on its springs)
+  const wg = new T.CylinderGeometry(0.42, 0.42, 0.28, 24); wg.rotateZ(Math.PI/2);
+  const hg = new T.CylinderGeometry(0.22, 0.22, 0.3, 16); hg.rotateZ(Math.PI/2);
+  const sg = new T.BoxGeometry(0.31, 0.36, 0.06);
+  CH.wheels = []; CH.steer = [];
+  for (const [x, z, front] of [[-0.92, -1.9, 1], [0.92, -1.9, 1], [-0.92, 2.2, 0], [0.92, 2.2, 0]]){
+    const pivot = new T.Group(); pivot.position.set(x, 0.42, z); car.add(pivot);
+    const wheel = new T.Group(); pivot.add(wheel);
+    wheel.add(new T.Mesh(wg, M.tire)); wheel.add(new T.Mesh(hg, M.chrome)); wheel.add(new T.Mesh(sg, M.dark));
+    CH.wheels.push(wheel); if (front) CH.steer.push(pivot);
+  }
+  // soft contact shadow
+  const shTex = canvasTex(T, 128, 256, (g, w, h) => { const gr = g.createRadialGradient(w/2, h/2, 10, w/2, h/2, w*0.9);
+    gr.addColorStop(0, 'rgba(0,0,0,0.75)'); gr.addColorStop(0.55, 'rgba(0,0,0,0.45)'); gr.addColorStop(1, 'rgba(0,0,0,0)');
+    g.fillStyle = gr; g.fillRect(0, 0, w, h); });
+  const sh = new T.Mesh(new T.PlaneGeometry(3.0, 7.6), new T.MeshBasicMaterial({map:shTex, transparent:true, depthWrite:false}));
+  sh.rotation.x = -Math.PI/2; sh.position.set(0, 0.015, 0.4); car.add(sh);
+  return car;
+}
+
+function updateChaseTheme(){
+  if (!CH.ready) return;
+  const th = THEMES[LOC().cls], M = CH.mats;
+  M.paint.color.setHex(th.paint); M.roof.color.setHex(th.roof);
+  M.s1.color.setHex(th.s1); M.s2.color.setHex(th.s2); M.s3.color.setHex(th.s3);
+  for (const t of [CH.rearTex, CH.signTex]){ const c = t.userData.canvas; t.userData.draw(c.getContext('2d'), c.width, c.height); t.needsUpdate = true; }
+}
+
+function resizeChase(){
+  if (!CH.ready) return;
+  const el = $('#car3d'), w = el.clientWidth || innerWidth, h = el.clientHeight || innerHeight, ar = w/h;
+  CH.renderer.setSize(w, h, false);
+  // a "chase lens": fixed field of view, tilted down, image shifted so the jeepney sits low in the frame
+  const portrait = ar < 1;
+  CH.cam.aspect = ar; CH.cam.fov = portrait ? 70 : 45;
+  CH.cam.rotation.x = -14*Math.PI/180;
+  CH.cam.setViewOffset(w, h, 0, -h*(portrait ? 0.12 : 0.07), w, h);
+  CH.cam.updateProjectionMatrix();
+  CH.car.position.set(0, 0, -((portrait ? 5.0 : 5.0) + 3.3));   // rear bumper this far ahead of the camera
+}
+
+function chaseTurn(deg){ if (CH.ready) CH.yaw = Math.max(-0.9, Math.min(0.9, deg*Math.PI/180*0.55)); }
+
+function chaseFrame(now){
+  if (!CH.ready) return;
+  const t = now/1000, dt = Math.min(0.05, CH.lastT ? t - CH.lastT : 0.016); CH.lastT = t;
+  if (paused()) return;
+  const T = CH.T, body = CH.body, v = (S.gear ? S.speedKmh : 0)/3.6, moving = v > 0.5;
+  CH.wheelRot -= v*dt/0.42;
+  for (const w of CH.wheels) w.rotation.x = CH.wheelRot;
+  CH.yaw += (0 - CH.yaw)*Math.min(1, dt*3.2);
+  CH.car.rotation.y = CH.yaw;
+  for (const p of CH.steer) p.rotation.y = -CH.yaw*0.9;
+  CH.bump = Math.max(0, CH.bump - dt*4.5);
+  const braking = performance.now() - CH.brakeT < 700;
+  body.position.y = (moving ? 0.006*Math.sin(t*31) + 0.012*Math.sin(t*2.3) : 0.0025*Math.sin(t*22)) - 0.035*Math.sin(CH.bump*Math.PI);
+  body.rotation.z = CH.yaw*0.13 + (moving ? 0.004*Math.sin(t*1.7) : 0);
+  body.rotation.x = braking ? -0.014 : (moving ? 0.004 : 0);
+  CH.mats.tail.emissiveIntensity = (S.gear === 0 || braking) ? 2.6 : 0.6;
+  const on = (t*2.5) % 1 < 0.5;
+  CH.mats.blinkL.emissiveIntensity = S.blinker === 'L' && on ? 3.2 : 0;
+  CH.mats.blinkR.emissiveIntensity = S.blinker === 'R' && on ? 3.2 : 0;
+  // exhaust
+  CH.smokeT += dt;
+  if (CH.smokeT > (S.gear ? 0.12 : 0.5)){
+    CH.smokeT = 0;
+    const p = CH.puffs.find(p => p.life > 1);
+    if (p){ p.life = 0; p.sp.visible = true; p.sp.position.copy(CH.car.localToWorld(new T.Vector3(-0.6, 0.38, 3.45)));
+            p.v.set((Math.random() - 0.5)*0.2, 0.25 + Math.random()*0.2, 0.25 + v*0.12); }
+  }
+  for (const p of CH.puffs){
+    if (p.life > 1){ p.sp.visible = false; continue; }
+    p.life += dt; p.sp.position.addScaledVector(p.v, dt);
+    const s = 0.18 + p.life*(S.gear ? 0.75 : 0.45); p.sp.scale.set(s, s, s);
+    p.sp.material.opacity = 0.24*(1 - p.life)*(S.gear ? 1 : 0.6);
+  }
+  CH.renderer.render(CH.scene, CH.cam);
+}
+
+async function setView(v){
+  S.settings.view = v; store.set('jeep.settings', S.settings);
+  document.body.classList.toggle('chase', v === 'chase');
+  $('#viewBtn').textContent = v === 'chase' ? '🚐' : '🎥';
+  if (v === 'chase'){
+    const ok = await loadChase();
+    if (!ok){ toast('Could not load the 3D jeepney – using the cab view'); return setView('cab'); }
+    updateChaseTheme(); resizeChase(); CH.lastT = 0; CH.renderer.setAnimationLoop(chaseFrame);
+  } else if (CH.renderer) CH.renderer.setAnimationLoop(null);
+  applyPov(); showPhoto.last = null; showPhoto();
+}
+
 /* ---------- HUD ---------- */
 function updateHud(){
   const L = LOC(), P = S.prog; if (!P) return;
@@ -1112,7 +1392,7 @@ function applyLocUI(){
   const L = LOC();
   document.body.classList.remove('ph', 'sk'); document.body.classList.add(L.cls);
   $('#sign').textContent = L.sign;
-  renderLocCards();
+  renderLocCards(); updateChaseTheme();
 }
 function renderLocCards(){
   for (const box of [$('#setupLocs'), $('#menuLocs')]){
@@ -1145,6 +1425,7 @@ async function onStart(){
   S.settings.passengers = $('#optPass').checked; S.settings.sound = $('#optSound').checked; S.settings.zoomFx = $('#optZoom').checked;
   store.set('jeep.settings', S.settings);
   S.settings.photo = $('#optPhoto').checked;
+  S.settings.view = $('#optChase').checked ? 'chase' : 'cab';
   store.set('jeep.settings', S.settings);
   const btn = $('#startBtn'); btn.disabled = true; btn.textContent = 'Starting the engine…'; $('#setupErr').textContent = '';
   try{
@@ -1153,7 +1434,9 @@ async function onStart(){
     applyLocUI(); loadProgress(S.settings.loc); rebuildOverlays();
     $('#setup').hidden = true;              // Street View must start in a visible container
     setPhotoMode(S.settings.photo);
+    const viewReady = setView(S.settings.view);   // loads the 3D jeepney in parallel
     const ok = await jumpTo(LOC().start);
+    await viewReady;
     if (authFailed) return;
     if (!ok) throw new Error('No Street View found near ' + LOC().startLabel + '.');
     S.started = true;
@@ -1245,6 +1528,7 @@ addEventListener('keydown', e => {
   else if (k === 's' || k === 'x') setGear(0);
   else if (k === 'u') uTurn();
   else if (k === 'm') bigOpen ? closeMap() : openMap();
+  else if (k === 'v') setView(S.settings.view === 'chase' ? 'cab' : 'chase');
   else if (k === 'escape'){ if (bigOpen) closeMap(); else openMenu(); }
   else used = false;
   if (used){ e.preventDefault(); audioInit(); }
@@ -1254,7 +1538,8 @@ document.addEventListener('visibilitychange', () => {
   if (document.hidden) saveNow(); else if (S.started) keepAwake();
 });
 addEventListener('pagehide', saveNow);
-addEventListener('resize', () => computeBaseZoom());
+addEventListener('resize', () => { computeBaseZoom(); resizeChase(); showPhoto.last = null; showPhoto(); });
+press($('#viewBtn'), () => setView(S.settings.view === 'chase' ? 'cab' : 'chase'));
 
 /* ---------- boot ---------- */
 (function boot(){
@@ -1266,6 +1551,7 @@ addEventListener('resize', () => computeBaseZoom());
   if (!S.key) $('#keyHelp').open = true;
   $('#optPass').checked = S.settings.passengers; $('#optSound').checked = S.settings.sound; $('#optZoom').checked = S.settings.zoomFx;
   $('#optPhoto').checked = S.settings.photo;
+  $('#optChase').checked = S.settings.view === 'chase';
   applyLocUI();
   if ('speechSynthesis' in window) speechSynthesis.getVoices();
 })();
