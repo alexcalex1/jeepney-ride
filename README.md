@@ -15,4 +15,6 @@ The game needs your own Google Maps JavaScript API key. It is typed into the pag
 Restrict the key to the website `https://alexcalex1.github.io/*` and to the Maps JavaScript API.
 Each press of **Start** uses one Dynamic Street View session.
 
+**🌍 3D world (beta):** ☰ → 3D world drives smoothly through Google's Photorealistic 3D Tiles along the same real roads. Needs the **Map Tiles API** enabled for the key. Where Google has no 3D model you'll see flat satellite ground.
+
 **Black screen instead of streets?** Open ☰ and switch on **📷 Photo mode**. It shows Street View as plain pictures and needs the **Street View Static API** enabled for the same key (one image per hop).

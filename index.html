@@ -7,7 +7,9 @@
 <title>Jeepney Ride · Street View</title>
 <script type="importmap">
 {"imports":{"three":"https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.min.js",
-            "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"}}
+            "three/addons/":"https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/",
+            "3d-tiles-renderer":"https://cdn.jsdelivr.net/npm/3d-tiles-renderer@0.5.4/build/index.js",
+            "3d-tiles-renderer/plugins":"https://cdn.jsdelivr.net/npm/3d-tiles-renderer@0.5.4/build/index.plugins.js"}}
 </script>
 <style>
 :root{
@@ -60,14 +62,23 @@ body.chase .roofbtn{background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,
 
 /* ---------- Chase view (3D jeepney from behind) ---------- */
 #car3d{position:fixed;left:0;top:0;width:100%;height:calc(100% - var(--dash-h));z-index:2;pointer-events:none;display:none}
-body.chase #car3d{display:block}
-body.chase #roof,body.chase #mirror,body.chase #hood,body.chase #pillarL,body.chase #pillarR{display:none}
+body.chase #car3d,body.world #car3d{display:block}
+body.chase #roof,body.chase #mirror,body.chase #hood,body.chase #pillarL,body.chase #pillarR,
+body.world #roof,body.world #mirror,body.world #hood,body.world #pillarL,body.world #pillarR{display:none}
 body.chase #sv,body.chase #photo{bottom:var(--dash-h)}
-body.chase #hud,body.chase #mapWrap{top:calc(env(safe-area-inset-top) + 56px)}
+body.world #sv,body.world #photo,body.world #speedfx{visibility:hidden}
+body.chase #hud,body.chase #mapWrap,body.world #hud,body.world #mapWrap{top:calc(env(safe-area-inset-top) + 56px)}
 body.chase #speedfx{top:calc(env(safe-area-inset-top) + 56px);bottom:calc(var(--dash-h) + 40px)}
-body.chase #banner{bottom:calc(var(--dash-h) + 0.47*(100vh - var(--dash-h)))}
-body.chase #toast{top:calc(env(safe-area-inset-top) + 196px)}
-@media (orientation:landscape){ body.chase #banner{bottom:auto;top:calc(env(safe-area-inset-top) + 10px)} body.chase #toast{top:calc(env(safe-area-inset-top) + 64px)} }
+body.chase #banner,body.world #banner{bottom:calc(var(--dash-h) + 0.47*(100vh - var(--dash-h)))}
+body.chase #toast,body.world #toast{top:calc(env(safe-area-inset-top) + 196px)}
+@media (orientation:landscape){ body.chase #banner,body.world #banner{bottom:auto;top:calc(env(safe-area-inset-top) + 10px)}
+  body.chase #toast,body.world #toast{top:calc(env(safe-area-inset-top) + 64px)} }
+body.world .roofbtn{background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.2)}
+#wAttr{display:none;position:fixed;left:6px;right:6px;bottom:calc(var(--dash-h) + 4px);z-index:3;font-size:10px;color:#fff;
+  text-shadow:0 1px 2px #000;pointer-events:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#wAttr b{font-size:13px;margin-right:6px}
+body.world #wAttr{display:block}
+body.world #viewBtn{display:none}
 #lamp1,#lamp2{position:absolute;top:calc(env(safe-area-inset-top) + 18px);width:12px;height:12px;border-radius:50%;
   background:radial-gradient(#fff7ad,#f59e0b);box-shadow:0 0 10px #fbbf24}
 #lamp1{left:calc(50% - 34vw)} #lamp2{right:calc(50% - 34vw)}
@@ -232,6 +243,7 @@ kbd{background:#1e293b;border:1px solid #475569;border-radius:5px;padding:0 5px;
 <div id="photo" hidden><img alt=""><img alt=""><span class="attr">Imagery © Google</span></div>
 <div id="speedfx"></div>
 <canvas id="car3d"></canvas>
+<div id="wAttr"><b>Google</b><span id="wAttrText"></span></div>
 <button id="menuBtn" class="roofbtn" aria-label="Menu">☰</button>
 <button id="viewBtn" class="roofbtn" aria-label="Switch camera">🎥</button>
 
@@ -362,10 +374,10 @@ kbd{background:#1e293b;border:1px solid #475569;border-radius:5px;padding:0 5px;
       <ol>
         <li>Open <a href="https://console.cloud.google.com/" target="_blank" rel="noopener" style="color:#7dd3fc">console.cloud.google.com</a> and create a project (e.g. “Jeepney”).</li>
         <li><b>Billing</b> → link a billing account (a card is required). Google includes free monthly usage per API, and this game uses <b>one Street View session each time you press Start</b>.</li>
-        <li><b>APIs &amp; Services → Library</b> → enable <b>Maps JavaScript API</b> (and <b>Street View Static API</b> if you want Photo mode).</li>
+        <li><b>APIs &amp; Services → Library</b> → enable <b>Maps JavaScript API</b> (plus <b>Street View Static API</b> for Photo mode and <b>Map Tiles API</b> for the 3D world).</li>
         <li><b>APIs &amp; Services → Credentials → Create credentials → API key</b>. Copy it here.</li>
         <li>Edit the key → <b>Application restrictions: Websites</b> → add <code id="originHint">https://your-site.example/*</code><br>
-            <b>API restrictions</b> → Maps JavaScript API (+ Street View Static API) → Save.</li>
+            <b>API restrictions</b> → Maps JavaScript API (+ Street View Static API, Map Tiles API) → Save.</li>
         <li>Optional safety net: <b>Billing → Budgets &amp; alerts</b> → set a small budget alert, and/or lower the daily limits in the API's <b>Quotas</b> page.</li>
       </ol>
       <p id="fileWarn" class="err" hidden>You opened this file directly from disk. Google's “Websites” restriction can't match local files — upload this file to a website (any HTTPS hosting) and open it from there.</p>
@@ -409,6 +421,7 @@ kbd{background:#1e293b;border:1px solid #475569;border-radius:5px;padding:0 5px;
     <label class="opt"><input type="checkbox" id="mPass"> Pasahero mode</label>
     <label class="opt"><input type="checkbox" id="mSound"> Sound</label>
     <label class="opt"><input type="checkbox" id="mZoom"> Motion effect</label>
+    <label class="opt"><input type="checkbox" id="mWorld"> 🌍 <b>3D world (beta)</b> – drive smoothly through Google's 3D model of the area instead of photos. Needs <b>Map Tiles API</b> enabled for your key.</label>
     <label class="opt"><input type="checkbox" id="mPhoto"> 📷 Photo mode – if the street view is black. Swipe left/right to look around. Needs <b>Street View Static API</b> enabled for your key.</label>
     <p class="note" id="diag"></p>
   </div>
@@ -876,6 +889,7 @@ function onArrive(){
   }
   if (!S.cells.has(ck)){ S.cells.add(ck); S.recentCells.push(ck); if (S.recentCells.length > 4) S.recentCells.shift(); }
   S.pos = pos; S.lastArriveT = now; S.curZoom = -1;
+  if (W.on) worldArrive(pos);
   S.trail[S.trail.length - 1].push([+pos.lat.toFixed(5), +pos.lng.toFixed(5)]);
   if (curLine) curLine.getPath().push(new google.maps.LatLng(pos.lat, pos.lng));
   updatePlayer();
@@ -1311,12 +1325,14 @@ function chaseFrame(now){
   CH.wheelRot -= v*dt/0.42;
   for (const w of CH.wheels) w.rotation.x = CH.wheelRot;
   CH.yaw += (0 - CH.yaw)*Math.min(1, dt*3.2);
-  CH.car.rotation.y = CH.yaw;
-  for (const p of CH.steer) p.rotation.y = -CH.yaw*0.9;
+  const lean = W.on ? W.lean : CH.yaw;
+  if (!W.on) CH.car.rotation.y = CH.yaw;
+  for (const p of CH.steer) p.rotation.y = -lean*0.9;
   CH.bump = Math.max(0, CH.bump - dt*4.5);
   const braking = performance.now() - CH.brakeT < 700;
   body.position.y = (moving ? 0.006*Math.sin(t*31) + 0.012*Math.sin(t*2.3) : 0.0025*Math.sin(t*22)) - 0.035*Math.sin(CH.bump*Math.PI);
-  body.rotation.z = CH.yaw*0.13 + (moving ? 0.004*Math.sin(t*1.7) : 0);
+  body.rotation.z = lean*0.13 + (moving ? 0.004*Math.sin(t*1.7) : 0);
+  if (W.on) worldMove(dt, now);
   body.rotation.x = braking ? -0.014 : (moving ? 0.004 : 0);
   CH.mats.tail.emissiveIntensity = (S.gear === 0 || braking) ? 2.6 : 0.6;
   const on = (t*2.5) % 1 < 0.5;
@@ -1328,7 +1344,7 @@ function chaseFrame(now){
     CH.smokeT = 0;
     const p = CH.puffs.find(p => p.life > 1);
     if (p){ p.life = 0; p.sp.visible = true; p.sp.position.copy(CH.car.localToWorld(new T.Vector3(-0.6, 0.38, 3.45)));
-            p.v.set((Math.random() - 0.5)*0.2, 0.25 + Math.random()*0.2, 0.25 + v*0.12); }
+            p.v.set((Math.random() - 0.5)*0.2, 0.25 + Math.random()*0.2, W.on ? 0.3 : 0.25 + v*0.12).applyQuaternion(CH.car.quaternion); }
   }
   for (const p of CH.puffs){
     if (p.life > 1){ p.sp.visible = false; continue; }
@@ -1336,7 +1352,174 @@ function chaseFrame(now){
     const s = 0.18 + p.life*(S.gear ? 0.75 : 0.45); p.sp.scale.set(s, s, s);
     p.sp.material.opacity = 0.24*(1 - p.life)*(S.gear ? 1 : 0.6);
   }
-  CH.renderer.render(CH.scene, CH.cam);
+  if (W.on) worldRender(now); else CH.renderer.render(CH.scene, CH.cam);
+}
+
+/* =====================================================================
+   3D world (beta) – Google Photorealistic 3D Tiles, smooth driving
+   ===================================================================== */
+const W = { on:false, ready:false, loading:null, rootLoaded:false, lean:0, gOff:0, gTarget:null, rayT:0, attrT:0, camInit:false,
+            cur:null, from:null, to:null, curH:0, fromH:0, toH:0, t0:0, dur:1, period:0, lastArr:0, origin:null };
+const D2R = Math.PI/180;
+
+async function loadWorld(){
+  if (W.ready) return true;
+  if (!W.loading) W.loading = (async () => {
+    if (!(await loadChase())) return false;
+    const T = CH.T;
+    const {TilesRenderer} = await import('3d-tiles-renderer');
+    const P = await import('3d-tiles-renderer/plugins');
+    const {DRACOLoader} = await import('three/addons/loaders/DRACOLoader.js');
+    const tiles = new TilesRenderer();
+    tiles.registerPlugin(new P.GoogleCloudAuthPlugin({apiToken:S.key, autoRefreshToken:true}));
+    const draco = new DRACOLoader(); draco.setDecoderPath('https://www.gstatic.com/draco/versioned/decoders/1.5.6/');
+    tiles.registerPlugin(new P.GLTFExtensionsPlugin({dracoLoader:draco}));
+    tiles.registerPlugin(new P.TileCompressionPlugin());
+    tiles.registerPlugin(new P.UnloadTilesPlugin());
+    tiles.registerPlugin(new P.TilesFadePlugin());
+    const o = S.pos || LOC().start;
+    W.origin = {lat:o.lat, lng:o.lng};
+    W.reo = new P.ReorientationPlugin({lat:o.lat*D2R, lon:o.lng*D2R, height:0});
+    tiles.registerPlugin(W.reo);
+    tiles.errorTarget = 24;                                     // a bit coarser than default: kinder to phones
+    tiles.addEventListener('load-root-tileset', () => { W.rootLoaded = true; });
+    tiles.addEventListener('load-error', e => {
+      console.warn('3D tiles error', e.error || e);
+      if (!W.rootLoaded) worldFailed(/40[13]/.test(String(e.error)) ? 'key' : 'net');
+    });
+    const scene = new T.Scene();
+    scene.background = new T.Color(0x9fcbef);
+    scene.fog = new T.Fog(0xb9d7f0, 1500, 12000);
+    scene.environment = CH.scene.environment;
+    scene.add(new T.HemisphereLight(0xe8f2ff, 0x5b4a38, 1.0));
+    const sun = new T.DirectionalLight(0xfff6e5, 2.2); sun.position.set(-500, 1200, 400); scene.add(sun);
+    scene.add(tiles.group);
+    const cam = new T.PerspectiveCamera(60, 1, 0.5, 40000);
+    tiles.setCamera(cam);
+    W.T = T; W.tiles = tiles; W.scene = scene; W.cam = cam;
+    W.ray = new T.Raycaster(); W.ray.firstHitOnly = true;
+    W.v = [0, 1, 2, 3, 4, 5].map(() => new T.Vector3());
+    W.ready = true; return true;
+  })().catch(e => { console.warn('3D world failed to load', e); W.loading = null; return false; });
+  return W.loading;
+}
+
+// the root tileset could not be loaded: explain, switch back, and allow a clean retry later
+function worldFailed(why){
+  if (W.failedShown) return; W.failedShown = true;
+  toast(why === 'key'
+    ? '🌍 Google refused the 3D tiles. Enable the <b>Map Tiles API</b> for your key (Google Cloud → APIs &amp; Services → Library), then try again.'
+    : '🌍 Could not load Google\'s 3D tiles. Check your connection and try again.', 9000);
+  if (W.on) setWorld(false);
+  try{ W.tiles && W.tiles.dispose(); }catch(e){}
+  W.ready = false; W.loading = null; W.rootLoaded = false;
+}
+
+function geoToWorld(lat, lng, target){
+  W.tiles.ellipsoid.getCartographicToPosition(lat*D2R, lng*D2R, 0, target);
+  return target.applyMatrix4(W.tiles.group.matrixWorld);
+}
+
+function resizeWorld(){
+  if (!W.ready) return;
+  const el = $('#car3d'), w = el.clientWidth || innerWidth, h = el.clientHeight || innerHeight;
+  W.cam.aspect = w/h; W.cam.fov = w < h ? 68 : 50; W.cam.updateProjectionMatrix();
+  W.tiles.setResolutionFromRenderer(W.cam, CH.renderer);
+}
+
+// called on every Street View hop while the 3D world is on: glide from where we are to the new point
+function worldArrive(pos, teleport){
+  const now = performance.now();
+  if (teleport || !W.cur || dist(W.cur, pos) > 150){
+    W.cur = W.from = W.to = {...pos}; W.curH = W.fromH = W.toH = S.travelHeading; W.t0 = now; W.dur = 1; W.camInit = false; W.lastArr = 0;
+    return;
+  }
+  W.period = W.lastArr ? W.period*0.6 + (now - W.lastArr)*0.4 : GEAR_MS[Math.max(1, S.gear)];
+  W.lastArr = now;
+  W.from = {...W.cur}; W.to = {...pos}; W.fromH = W.curH; W.toH = S.travelHeading; W.t0 = now;
+  W.dur = Math.max(GEAR_MS[Math.max(1, S.gear)], Math.min(W.period, 2500))*1.03;
+}
+
+function worldMove(dt, now){
+  if (!W.cur) return;
+  const k = Math.min(1, (now - W.t0)/W.dur);
+  W.cur = {lat: W.from.lat + (W.to.lat - W.from.lat)*k, lng: W.from.lng + (W.to.lng - W.from.lng)*k};
+  const hk = Math.min(1, (now - W.t0)/Math.min(W.dur, 500)), e = hk*hk*(3 - 2*hk);
+  const prevH = W.curH;
+  W.curH = norm(W.fromH + angDiff(W.toH, W.fromH)*e);
+  const rate = angDiff(W.curH, prevH)*D2R/Math.max(dt, 0.001);
+  W.lean += (Math.max(-0.6, Math.min(0.6, rate*0.35)) - W.lean)*Math.min(1, dt*6);
+}
+
+function worldRender(now){
+  const T = W.T, tiles = W.tiles, [p, n, e, up, dir, tmp] = W.v;
+  if (W.rootLoaded && W.cur){
+    // keep the world origin near the jeepney so numbers stay small
+    if (dist(W.cur, W.origin) > 3000){
+      W.origin = {...W.cur};
+      W.reo.transformLatLonHeightToOrigin(W.cur.lat*D2R, W.cur.lng*D2R, 0);
+    }
+    tiles.group.updateMatrixWorld(true);
+    geoToWorld(W.cur.lat, W.cur.lng, p);
+    geoToWorld(W.cur.lat + 0.0001, W.cur.lng, n).sub(p).normalize();
+    geoToWorld(W.cur.lat, W.cur.lng + 0.0001, e).sub(p).normalize();
+    up.crossVectors(e, n).normalize();
+    const h = W.curH*D2R;
+    dir.copy(n).multiplyScalar(Math.cos(h)).addScaledVector(e, Math.sin(h)).normalize();
+    // find the road surface under the jeepney (photogrammetry ground), smoothed
+    if (now - W.rayT > 110){
+      W.rayT = now;
+      W.ray.set(tmp.copy(p).addScaledVector(up, 1500), up.clone().negate());
+      const hit = W.ray.intersectObject(tiles.group, true)[0];
+      if (hit){ const off = hit.point.sub(p).dot(up); W.gTarget = off; if (W.gOff === null || !W.groundInit){ W.gOff = off; W.groundInit = true; } }
+    }
+    if (W.gTarget !== null) W.gOff += (W.gTarget - W.gOff)*Math.min(1, Math.max(0.05, (now - (W.lastRender || now))/1000*8));
+    p.addScaledVector(up, W.gOff);
+    CH.car.position.copy(p); CH.car.up.copy(up); CH.car.lookAt(tmp.copy(p).sub(dir));
+    // chase camera
+    const fdt = Math.min(0.1, (now - (W.lastRender || now))/1000); W.lastRender = now;
+    const want = tmp.copy(p).addScaledVector(dir, -9.5).addScaledVector(up, 4.2);
+    if (!W.camInit || W.cam.position.distanceTo(want) > 25){ W.cam.position.copy(want); W.camInit = true; }
+    else W.cam.position.lerp(want, 1 - Math.exp(-fdt*7));          // same follow feel at any frame rate
+    W.cam.up.copy(up);
+    W.cam.lookAt(tmp.copy(p).addScaledVector(up, 1.6).addScaledVector(dir, 5));
+  }
+  W.cam.updateMatrixWorld();
+  tiles.update();
+  CH.renderer.render(W.scene, W.cam);
+  if (now - W.attrT > 1000){
+    W.attrT = now;
+    const a = (tiles.getAttributions ? tiles.getAttributions() : []).filter(x => x.type === 'string').map(x => x.value).join(' ');
+    $('#wAttrText').textContent = a;
+  }
+}
+
+async function setWorld(on){
+  if (on){
+    if (!S.pos){ toast('Start driving first'); return; }
+    toast('🌍 Loading the 3D world…', 2500);
+    W.failedShown = false;
+    const ok = await loadWorld();
+    if (!ok || !W.ready){ if (!W.failedShown) toast('Could not start the 3D world', 4000); return setWorld(false); }
+    W.on = true; document.body.classList.add('world');
+    clearTimeout(W.watchdog);
+    W.watchdog = setTimeout(() => { if (W.on && !W.rootLoaded) worldFailed('net'); }, 20000);
+    W.scene.add(CH.car); CH.puffs.forEach(p => W.scene.add(p.sp));
+    CH.yaw = 0; W.lean = 0; W.groundInit = false; W.gTarget = null; W.gOff = 0;
+    if (W.rootLoaded && dist(S.pos, W.origin) > 500){ W.origin = {...S.pos}; W.reo.transformLatLonHeightToOrigin(S.pos.lat*D2R, S.pos.lng*D2R, 0); }
+    worldArrive(S.pos, true);
+    resizeWorld(); CH.lastT = 0; CH.renderer.setAnimationLoop(chaseFrame);
+    setTimeout(() => { if (W.on) toast('🌍 3D world. Flat satellite ground with no buildings = Google has no 3D model here.', 6000); }, 4000);
+  } else {
+    W.on = false; document.body.classList.remove('world');
+    if (CH.ready){
+      CH.scene.add(CH.car); CH.puffs.forEach(p => CH.scene.add(p.sp));
+      CH.car.quaternion.identity(); CH.car.up.set(0, 1, 0); resizeChase();
+      if (S.settings.view !== 'chase') CH.renderer.setAnimationLoop(null);
+    }
+  }
+  S.settings.world = !!on && W.on; store.set('jeep.settings', S.settings);
+  const cb = $('#mWorld'); if (cb) cb.checked = W.on;
 }
 
 async function setView(v){
@@ -1347,7 +1530,7 @@ async function setView(v){
     const ok = await loadChase();
     if (!ok){ toast('Could not load the 3D jeepney – using the cab view'); return setView('cab'); }
     updateChaseTheme(); resizeChase(); CH.lastT = 0; CH.renderer.setAnimationLoop(chaseFrame);
-  } else if (CH.renderer) CH.renderer.setAnimationLoop(null);
+  } else if (CH.renderer && !W.on) CH.renderer.setAnimationLoop(null);
   applyPov(); showPhoto.last = null; showPhoto();
 }
 
@@ -1445,6 +1628,7 @@ async function onStart(){
     if (!S.settings.photo) setTimeout(() => { if (!S.settings.photo && !S.menuOpen)
       toast('Black screen instead of streets? Tap <b>☰</b> and switch on <b>📷 Photo mode</b>.', 6500); }, 8000);
     keepAwake(); schedule(200);
+    if (S.settings.world) setWorld(true);
   }catch(e){
     if (e.message === 'AUTH' || authFailed){ showAuthError(); }
     else { $('#setup').hidden = false; $('#setupErr').textContent = e.message || String(e); }
@@ -1459,7 +1643,7 @@ function openMenu(){
   if (!S.started) return;
   S.menuOpen = true; $('#menu').hidden = false;
   $('#mPass').checked = S.settings.passengers; $('#mSound').checked = S.settings.sound; $('#mZoom').checked = S.settings.zoomFx;
-  $('#mPhoto').checked = S.settings.photo;
+  $('#mPhoto').checked = S.settings.photo; $('#mWorld').checked = W.on;
   renderLocCards(); engineUpdate(); saveNow(); updateDiag();
 }
 function closeMenu(){ S.menuOpen = false; $('#menu').hidden = true; engineUpdate(); schedule(100); }
@@ -1507,7 +1691,7 @@ $('#mPhoto').addEventListener('change', e => { setPhotoMode(e.target.checked); u
 })();
 function updateDiag(){
   let gl = false; try{ const c = document.createElement('canvas'); gl = !!(c.getContext('webgl') || c.getContext('experimental-webgl')); }catch(e){}
-  $('#diag').textContent = `Diagnostics · Street View: ${S.svStatus || (pano ? 'loading' : '—')} · WebGL: ${gl ? 'yes' : 'no'} · view: ${S.settings.photo ? 'photo' : 'interactive'}`;
+  $('#diag').textContent = `Diagnostics · Street View: ${S.svStatus || (pano ? 'loading' : '—')} · WebGL: ${gl ? 'yes' : 'no'} · view: ${W.on ? '3D world' + (W.rootLoaded ? ' (tiles OK)' : ' (no tiles yet)') : S.settings.photo ? 'photo' : 'interactive'}`;
 }
 for (const [id, key] of [['#mPass', 'passengers'], ['#mSound', 'sound'], ['#mZoom', 'zoomFx']]){
   $(id).addEventListener('change', e => {
@@ -1538,7 +1722,8 @@ document.addEventListener('visibilitychange', () => {
   if (document.hidden) saveNow(); else if (S.started) keepAwake();
 });
 addEventListener('pagehide', saveNow);
-addEventListener('resize', () => { computeBaseZoom(); resizeChase(); showPhoto.last = null; showPhoto(); });
+addEventListener('resize', () => { computeBaseZoom(); resizeChase(); resizeWorld(); showPhoto.last = null; showPhoto(); });
+$('#mWorld').addEventListener('change', e => setWorld(e.target.checked));
 press($('#viewBtn'), () => setView(S.settings.view === 'chase' ? 'cab' : 'chase'));
 
 /* ---------- boot ---------- */
