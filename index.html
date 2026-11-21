@@ -75,6 +75,12 @@ body.chase #toast,body.world #toast{top:calc(env(safe-area-inset-top) + 196px)}
   body.chase #toast,body.world #toast{top:calc(env(safe-area-inset-top) + 64px)} }
 body.world .roofbtn{background:rgba(0,0,0,.6);border:1px solid rgba(255,255,255,.2)}
 body.world #banner{bottom:calc(var(--dash-h) + 30px)}
+#modeBtn{position:fixed;top:calc(env(safe-area-inset-top) + 6px);left:56px;height:40px;padding:0 12px;border-radius:10px;z-index:9;
+  background:#0369a1;border:1px solid #38bdf8;font-weight:800;font-size:14px}
+body.mapopen #modeBtn,body.mapopen .roofbtn{display:none}
+.pick{display:flex;align-items:center;gap:8px}
+.pick > div{flex:1;min-width:0}
+.pick .big-btn{width:auto;margin:0;padding:12px 16px;font-size:16px}
 #wAttr{display:none;position:fixed;left:6px;right:6px;bottom:calc(var(--dash-h) + 4px);z-index:3;font-size:10px;color:#fff;
   text-shadow:0 1px 2px #000;pointer-events:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #wAttr b{font-size:13px;margin-right:6px}
@@ -153,13 +159,13 @@ body.world #wAttr{display:block}
 #mapHit{position:absolute;inset:0;z-index:2}
 #mapLabel{position:absolute;top:4px;left:50%;transform:translateX(-50%);font-size:10px;font-weight:800;
   background:rgba(0,0,0,.6);padding:1px 6px;border-radius:6px;z-index:3;pointer-events:none}
-body.mapopen #mapWrap{top:0;left:0;right:0;bottom:calc(38vh + env(safe-area-inset-bottom) + 14px);width:auto;height:auto;border-radius:0;border:0;z-index:40}
+body.mapopen #mapWrap{top:0;left:0;right:0;bottom:calc(24vh + env(safe-area-inset-bottom) + 14px);width:auto;height:auto;border-radius:0;border:0;z-index:40}
 body.mapopen::before{content:"";position:fixed;inset:0;background:#0b1220;z-index:39}
 body.mapopen #mapHit,body.mapopen #mapLabel{display:none}
 #bigBar,#bigSheet{display:none}
 body.mapopen #bigBar{display:flex;position:fixed;top:calc(env(safe-area-inset-top) + 8px);left:8px;right:8px;gap:6px;z-index:41;flex-wrap:wrap}
 body.mapopen #bigSheet{display:block;position:fixed;left:8px;right:8px;bottom:calc(env(safe-area-inset-bottom) + 6px);z-index:41;
-  height:38vh;overflow:auto;background:rgba(15,23,42,.92);border-radius:14px;padding:10px 12px;font-size:13px;
+  height:24vh;overflow:auto;background:rgba(15,23,42,.92);border-radius:14px;padding:10px 12px;font-size:13px;
   border:1px solid #334155}
 .pill{padding:9px 12px;border-radius:999px;background:rgba(15,23,42,.9);border:1px solid #475569;font-weight:700;font-size:13px}
 .pill.on{background:#0369a1;border-color:#38bdf8}
@@ -246,6 +252,7 @@ kbd{background:#1e293b;border:1px solid #475569;border-radius:5px;padding:0 5px;
 <div id="wAttr"><b>Google</b><span id="wAttrText"></span></div>
 <button id="menuBtn" class="roofbtn" aria-label="Menu">☰</button>
 <button id="viewBtn" class="roofbtn" aria-label="Switch camera">🎥</button>
+<button id="modeBtn" aria-label="Switch between 3D world and Street View">🌍 3D world</button>
 
 <!-- Cab overlay -->
 <div id="roof">
@@ -333,36 +340,30 @@ kbd{background:#1e293b;border:1px solid #475569;border-radius:5px;padding:0 5px;
 </div>
 
 <div id="hud">
-  <button id="target" aria-label="Next goal">
+  <button id="target" aria-label="Destination" hidden>
     <svg id="tArrow" viewBox="0 0 24 24"><path d="M12 2L20 21 12 16 4 21Z"/></svg>
-    <span id="tText"><span id="tName">—</span><span id="tDist"></span></span>
+    <span id="tText"><span id="tName">★ Destination</span><span id="tDist"></span></span>
   </button>
-  <div id="chips">
-    <span class="chip" id="chipGoals">🌊 0/5</span>
-    <span class="chip" id="chipRiders">👥 0</span>
-    <span class="chip" id="chipMoney">₱0</span>
-    <span class="chip" id="chipNew">🆕 0.0 km</span>
-  </div>
 </div>
 
 <div id="mapWrap"><div id="map"></div><button id="mapHit" aria-label="Open map"></button><span id="mapLabel">MAP</span></div>
 <div id="bigBar">
-  <button class="pill" id="closeMap">✕ Back to driving</button>
-  <button class="pill" id="jumpBtn">📍 Jump to a road</button>
+  <button class="pill" id="closeMap">✕ Back</button>
+  <button class="pill" id="fSights">⭐ Sights</button>
+  <button class="pill" id="fBiz">🏪 Shops &amp; food</button>
+  <button class="pill" id="fRoads">🔵 SV roads</button>
   <button class="pill" id="meBtn">⌖ Me</button>
 </div>
-<div id="jumpHint">Tap any <b>blue</b> road to drop the jeepney there</div>
 <div id="bigSheet"></div>
 
 <div id="banner"></div>
 <div id="toast"></div>
-<div id="celebrate"></div>
 
 <!-- ============ SETUP ============ -->
 <div id="setup" class="overlay">
  <div class="wrapC">
   <div class="logo"><h1>JEEPNEY RIDE</h1><div class="stripe"></div>
-    <p>Drive a jeepney through real Street View. Find every road to the sea, pick up passengers, collect fares.</p></div>
+    <p>Explore the Philippines by jeepney before you go: tap any attraction on the map and ride there – in real Street View or Google’s 3D world.</p></div>
 
   <div class="card">
     <h2>1 · Google Maps API key</h2>
@@ -391,7 +392,6 @@ kbd{background:#1e293b;border:1px solid #475569;border-radius:5px;padding:0 5px;
 
   <div class="card">
     <h2>3 · Options</h2>
-    <label class="opt"><input type="checkbox" id="optPass" checked> Pasahero mode – passengers wave, you stop, they pay</label>
     <label class="opt"><input type="checkbox" id="optSound" checked> Sound (diesel engine, horn, voices)</label>
     <label class="opt"><input type="checkbox" id="optChase" checked> 🎥 Chase camera – see your 3D jeepney from behind (switch any time with 🎥 / 🚐)</label>
     <label class="opt"><input type="checkbox" id="optZoom"> Motion effect for the interactive view (camera pushes forward between photos)</label>
@@ -403,9 +403,9 @@ kbd{background:#1e293b;border:1px solid #475569;border-radius:5px;padding:0 5px;
 
   <div class="card">
     <h2>Controls</h2>
-    <p><b>▲ GAS / ▼ BRAKE</b> change gear (N, 1–4). <b>■ STOP</b> stops for passengers.<br>
-       <b>◀ ▶</b> are the turn signals: switch one on and the jeepney turns at the next junction on that side.<br>
-       <b>↶</b> U-turn · tap the <b>steering wheel</b> to honk · drag the street view to look around · tap the round <b>map</b> to open the big map and jump to any blue road.</p>
+    <p><b>🗺 Map</b> (top right): tap a ⭐ attraction or any spot → <b>🚙 Ride here</b>. The ★ pill then points to it.<br>
+       <b>🌍 3D / 👁 Street</b> switches between Google’s 3D world and Street View.<br>
+       <b>▲ GAS / ▼ BRAKE</b> change speed, <b>◀ ▶</b> are turn signals (the jeepney turns at the next junction on that side), <b>↶</b> U-turn, drag the street view to look around.</p>
     <p class="note">Keyboard: <kbd>↑</kbd>/<kbd>↓</kbd> gear · <kbd>←</kbd>/<kbd>→</kbd> signals · <kbd>Space</kbd> horn · <kbd>S</kbd> stop · <kbd>U</kbd> U-turn · <kbd>M</kbd> map</p>
   </div>
   <p class="note" style="text-align:center">Street View imagery and map data © Google. Photos are taken every ~10 m, so the ride moves in short hops.</p>
@@ -418,7 +418,6 @@ kbd{background:#1e293b;border:1px solid #475569;border-radius:5px;padding:0 5px;
   <div class="logo"><h1>PAUSED</h1><div class="stripe"></div></div>
   <div class="card"><h2>Location</h2><div class="locs" id="menuLocs"></div></div>
   <div class="card">
-    <label class="opt"><input type="checkbox" id="mPass"> Pasahero mode</label>
     <label class="opt"><input type="checkbox" id="mSound"> Sound</label>
     <label class="opt"><input type="checkbox" id="mZoom"> Motion effect</label>
     <label class="opt"><input type="checkbox" id="mWorld"> 🌍 <b>3D world (beta)</b> – drive smoothly through Google's 3D model of the area instead of photos. Needs <b>Map Tiles API</b> enabled for your key.</label>
@@ -487,51 +486,42 @@ const fmtKm = m => (m >= 10 ? m.toFixed(0) : m.toFixed(1)) + ' km';
 
 /* ---------- locations ---------- */
 const LOCS = {
+  manila: {
+    id:'manila', cls:'ph', flag:'🇵🇭', name:'Philippines · Manila',
+    sub:'Start in Intramuros – tap any attraction on the map and ride there',
+    start:{lat:14.5896, lng:120.9747}, startLabel:'Intramuros, Manila',
+    sign:'QUIAPO ⇄ DIVISORIA', rear:'DIVISORIA  •  QUIAPO', art:['BIYAHENG','MAYNILA'],
+    ph:{ choose:'Kaliwa o kanan?', noLeft:'Walang kaliwa dito', noRight:'Walang kanan dito' }
+  },
   pangasinan: {
-    id:'pangasinan', cls:'ph', flag:'🇵🇭', name:'Pangasinan · Urdaneta',
-    sub:'Start in Urdaneta City and find the roads to Lingayen Gulf',
+    id:'pangasinan', cls:'ph', flag:'🇵🇭', name:'Philippines · Pangasinan',
+    sub:'Start in Urdaneta City – the roads to the Lingayen Gulf beaches',
     start:{lat:15.9761, lng:120.5711}, startLabel:'Urdaneta City',
-    sign:'URDANETA ⇄ DAGUPAN', cur:'₱', dec:0, lang:'fil-PH', icon:'🌊',
-    fare: km => 13 + Math.max(0, km - 4)*1.8,
-    ph:{ greet:'Tara na! Sakay na!', hail:'Sakay!', board:'Bayad po!', stop:'Para po!',
-         missed:'Lampas na po!', choose:'Kaliwa o kanan?', thanks:'Salamat po!', reach:'Nakarating sa dagat!', noLeft:'Walang kaliwa dito', noRight:'Walang kanan dito' },
-    goals:[
-      {id:'bolasi',     icon:'🌊', name:'Bolasi Beach · San Fabian',    lat:16.1534, lng:120.4175, r:550},
-      {id:'tondaligan', icon:'🌊', name:'Tondaligan Beach · Dagupan',   lat:16.0915, lng:120.3504, r:550},
-      {id:'binmaley',   icon:'🌊', name:'Binmaley Beach',               lat:16.0453, lng:120.2699, r:550},
-      {id:'lingayen',   icon:'🌊', name:'Lingayen Beach · Capitol',     lat:16.0360, lng:120.2316, r:600},
-      {id:'lucap',      icon:'🏝️', name:'Lucap Wharf · Hundred Islands', lat:16.1870, lng:120.0150, r:1200, reach:'Hundred Islands!'}
-    ]
+    sign:'URDANETA ⇄ DAGUPAN', rear:'DAGUPAN  •  URDANETA', art:['BIYAHENG','DAGAT'],
+    ph:{ choose:'Kaliwa o kanan?', noLeft:'Walang kaliwa dito', noRight:'Walang kanan dito' }
   },
   iza: {
     id:'iza', cls:'sk', flag:'🇸🇰', name:'Slovensko · Iža',
-    sub:'Danube village near Komárno – Roman fort and the town',
+    sub:'Danube village near Komárno',
     start:{lat:47.7495, lng:18.2335}, startLabel:'Iža',
-    sign:'IŽA ⇄ KOMÁRNO', cur:'€', dec:2, lang:'sk-SK', icon:'🏛️',
-    fare: km => 0.9 + km*0.12,
-    ph:{ greet:'Nastupovať, ideme!', hail:'Pasažier máva!', board:'Dobrý deň!', stop:'Zastavte, prosím!',
-         missed:'Prešli ste zastávku!', choose:'Vľavo alebo vpravo?', thanks:'Ďakujem!', reach:'Dorazil si!', noLeft:'Vľavo sa nedá', noRight:'Vpravo sa nedá' },
-    goals:[
-      {id:'kelemantia', icon:'🏛️', name:'Kelemantia · Roman fort on the Danube', lat:47.7448, lng:18.1990, r:350},
-      {id:'komarno',    icon:'🏙️', name:'Komárno · town centre',               lat:47.7619, lng:18.1284, r:600}
-    ]
+    sign:'IŽA ⇄ KOMÁRNO', rear:'KOMÁRNO  •  IŽA', art:['IŽA','EXPRESS'],
+    ph:{ choose:'Vľavo alebo vpravo?', noLeft:'Vľavo sa nedá', noRight:'Vpravo sa nedá' }
   }
 };
-const LOC = () => LOCS[S.settings.loc] || LOCS.pangasinan;
-const money = v => { const L = LOC(); return L.cur + v.toFixed(L.dec); };
+const LOC = () => LOCS[S.settings.loc] || LOCS.manila;
 
 /* ---------- state ---------- */
 const GEAR_MS = [0, 1500, 950, 620, 400];
 const S = {
   key: store.get('jeep.key', ''),
-  settings: Object.assign({loc:'pangasinan', passengers:true, sound:true, zoomFx:false, photo:false, view:'chase', worldCam:'drone'}, store.get('jeep.settings', {})),
+  settings: Object.assign({loc:'manila', sound:true, zoomFx:false, photo:false, view:'chase', worldCam:'drone', mapSights:true, mapBiz:false, mapRoads:true}, store.get('jeep.settings', {})),
   started:false, menuOpen:false,
   gear:0, blinker:null, blinkHops:0, busy:false, waitingTurn:null,
   travelHeading:0, lookOffset:0, userLooking:false,
   pos:null, lastArriveT:0, speedKmh:0, hopCount:0, baseZoom:1, curZoom:1, lastFx:0,
-  prog:null, trail:[], cells:new Set(), recentCells:[], hail:null, riders:[], targetId:null
+  prog:null, trail:[], cells:new Set(), recentCells:[], dest:null, pick:null
 };
-if (!LOCS[S.settings.loc]) S.settings.loc = 'pangasinan';
+if (!LOCS[S.settings.loc]) S.settings.loc = 'manila';
 if (!S.settings.v2){ S.settings.zoomFx = false; S.settings.v2 = true; store.set('jeep.settings', S.settings); }   // motion effect now opt-in
 const paused = () => S.menuOpen || bigOpen || document.hidden || !S.started;
 
@@ -590,23 +580,13 @@ const sfx = {
   fanfare(){ [523, 659, 784, 1047].forEach((f, i) => tone([f], .35, 'triangle', .12, i*.13)); },
   bump(){ tone([70], .08, 'sine', .08); }
 };
-function say(text){
-  if (!S.settings.sound || !('speechSynthesis' in window)) return;
-  try{
-    const L = LOC(), u = new SpeechSynthesisUtterance(text); u.lang = L.lang; u.rate = 1.05;
-    const v = speechSynthesis.getVoices().find(v => v.lang && v.lang.toLowerCase().startsWith(L.lang.slice(0, 2)));
-    if (v) u.voice = v;
-    speechSynthesis.cancel(); speechSynthesis.speak(u);
-  }catch(e){}
-}
-
 /* ---------- progress ---------- */
 function loadProgress(loc){
   S.prog = Object.assign({odo:0, newKm:0, goals:{}, money:0, delivered:0, missed:0}, store.get('jeep.prog.' + loc, {}));
   S.trail = store.get('jeep.trail.' + loc, []);
   S.cells = new Set(store.get('jeep.cells.' + loc, []));
   S.trail.push([]);
-  S.riders = []; S.hail = null; S.targetId = null; S.pos = null; S.recentCells = [];
+  S.dest = null; S.pick = null; S.pos = null; S.recentCells = [];
 }
 let saveT;
 function saveSoon(){ clearTimeout(saveT); saveT = setTimeout(saveNow, 1200); }
@@ -624,7 +604,7 @@ function saveNow(){
    Google Maps
    ===================================================================== */
 let G = {}, pano = null, svs = null, map = null, coverage = null, playerMk = null, curLine = null;
-let trailLines = [], goalMks = [], bigOpen = false, jumpMode = false, authFailed = false;
+let trailLines = [], pinMks = [], bigOpen = false, authFailed = false;
 
 function loadMaps(key){
   return new Promise((resolve, reject) => {
@@ -656,7 +636,8 @@ async function initGoogle(){
     clickableIcons:false, streetViewControl:false
   });
   coverage = new G.StreetViewCoverageLayer(); coverage.setMap(map);
-  map.addListener('click', e => { if (bigOpen && jumpMode && e.latLng) jumpFromMap(e.latLng.toJSON()); });
+  map.addListener('click', e => { if (bigOpen && e.latLng) pickPlace(e.latLng.toJSON(), e.placeId || null); });
+  applyMapStyle();
 
   // looking around by dragging
   const markLook = () => { S.userLooking = true; clearTimeout(markLook.t); };
@@ -810,13 +791,6 @@ async function jumpTo(ll){
     return true;
   } finally { S.busy = false; }
 }
-async function jumpFromMap(ll){
-  toast('Looking for Street View there…', 1500);
-  const ok = await jumpTo(ll).catch(e => { if (e.message === 'AUTH') showAuthError(); return false; });
-  if (!ok){ toast('No Street View there – tap a <b>blue</b> road'); return; }
-  setGear(0); closeMap(); toast('📍 Jeepney moved. Shift into gear ▲');
-}
-
 /* ---------- driving ---------- */
 function chooseLink(links){
   const opts = links.filter(l => l && l.pano && typeof l.heading === 'number')
@@ -843,7 +817,7 @@ async function hop(){
   if (!res.link){
     if (S.waitingTurn !== res.need){
       S.waitingTurn = res.need; sfx.ding();
-      if (res.need === 'choose') { pulseBlinkers(true); say(LOC().ph.choose); }
+      if (res.need === 'choose') pulseBlinkers(true);
       updateBanner();
     }
     return false;
@@ -896,8 +870,7 @@ function onArrive(){
   showPhoto(); prefetchNext();
   if (!bigOpen && map) map.panTo(pos);
   bump();
-  checkGoals();
-  passengerStep();
+  checkDestination();
   if (++S.hopCount % 8 === 0) saveSoon();
   updateHud();
 }
@@ -928,7 +901,6 @@ function setGear(n){
   n = Math.max(0, Math.min(4, n));
   const prev = S.gear; S.gear = n;
   if (n < prev) CH.brakeT = performance.now();
-  if (prev > 0 && n === 0) onStopped();
   if (prev === 0 && n > 0){ S.lastArriveT = performance.now(); schedule(GEAR_MS[n]*0.6); }
   $('#speedfx').style.opacity = n ? (0.25 + n*0.15) : 0;
   document.documentElement.style.setProperty('--sway', (2 + n*2.5) + 'deg');
@@ -962,85 +934,18 @@ function bump(){
   for (const id of ['#hood', '#dash']){ const el = $(id); el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }
 }
 
-/* ---------- passengers ---------- */
-function passengerStep(){
-  if (!S.settings.passengers){ S.hail = null; return; }
-  const L = LOC();
-  if (S.hail){
-    if (--S.hail.left <= 0){ S.hail = null; toast('🙋 You drove past the passenger…'); }
-  } else if (S.gear > 0 && S.riders.length < 14 && S.prog && Math.random() < 0.035){
-    S.hail = {left: 9}; sfx.ding(); say(L.ph.hail);
-  }
-  for (const r of S.riders){
-    if (!r.want && S.prog.odo >= r.dropAt){ r.want = true; r.left = 8; say(L.ph.stop); sfx.ding(); }
-    else if (r.want && !r.missed && --r.left <= 0){ r.missed = true; toast('😠 ' + L.ph.missed); }
-  }
-  updateBanner();
+/* ---------- destination: a place picked on the map ---------- */
+function checkDestination(){
+  if (!S.dest || !S.pos || S.dest.reached) return;
+  if (dist(S.pos, S.dest) <= 120){ S.dest.reached = true; sfx.ding(); toast('📍 You\'ve arrived – look around!', 3500); }
 }
-function onStopped(){
-  if (!S.settings.passengers || !S.prog) return;
-  const L = LOC();
-  const out = S.riders.filter(r => r.want);
-  if (out.length){
-    let sum = 0;
-    for (const r of out){
-      let fare = L.fare(S.prog.odo - r.from);
-      if (r.missed){ fare *= .5; S.prog.missed++; } else S.prog.delivered++;
-      sum += fare;
-    }
-    S.prog.money += sum;
-    S.riders = S.riders.filter(r => !r.want);
-    sfx.coin(); say(L.ph.thanks);
-    toast(`🚶 ${out.length} off · <b>+${money(sum)}</b>`);
-  }
-  if (S.hail){
-    S.hail = null;
-    S.riders.push({from:S.prog.odo, dropAt:S.prog.odo + 0.4 + Math.random()*3.2});
-    setTimeout(() => { sfx.coin(); say(L.ph.board); toast(`🙋 ${L.ph.board} Passenger on board`); }, out.length ? 900 : 200);
-  }
-  saveSoon(); updateBanner(); updateHud();
-}
-
-/* ---------- goals ---------- */
-function checkGoals(){
-  const L = LOC();
-  for (const g of L.goals){
-    if (S.prog.goals[g.id]) continue;
-    if (dist(S.pos, g) <= g.r){
-      S.prog.goals[g.id] = Date.now(); saveSoon(); celebrate(g); refreshGoalMarkers();
-      if (S.targetId === g.id) S.targetId = null;
-    }
-  }
-}
-function celebrate(g){
-  const L = LOC(), c = $('#celebrate');
-  const all = L.goals.every(x => S.prog.goals[x.id]);
-  c.innerHTML = `<div class="big">${g.icon}</div><div class="t">${g.reach || L.ph.reach}</div><div class="n">${g.name}</div>` +
-                (all ? `<div class="n" style="margin-top:8px">🏆 All ${L.goals.length} goals reached!</div>` : '');
-  c.classList.add('show'); sfx.fanfare(); say(g.reach || L.ph.reach);
-  for (let i = 0; i < 26; i++){
-    const s = document.createElement('span'); s.className = 'conf';
-    s.textContent = ['🎉','✨',g.icon,'🪙','🎊'][i % 5];
-    s.style.left = Math.random()*100 + 'vw'; s.style.animationDuration = (1.8 + Math.random()*1.6) + 's';
-    s.style.animationDelay = Math.random()*.5 + 's';
-    document.body.appendChild(s); setTimeout(() => s.remove(), 4200);
-  }
-  clearTimeout(celebrate.t); celebrate.t = setTimeout(() => c.classList.remove('show'), 3200);
-}
-function currentTarget(){
-  const L = LOC();
-  if (S.targetId){ const g = L.goals.find(g => g.id === S.targetId); if (g) return g; }
-  if (!S.pos) return L.goals[0];
-  let best = null, bd = Infinity;
-  for (const g of L.goals){ if (S.prog && S.prog.goals[g.id]) continue; const d = dist(S.pos, g); if (d < bd){ bd = d; best = g; } }
-  return best || L.goals[0];
-}
-function cycleTarget(){
-  const L = LOC(), ids = [null, ...L.goals.map(g => g.id)];
-  S.targetId = ids[(ids.indexOf(S.targetId) + 1) % ids.length];
-  const g = currentTarget();
-  toast(S.targetId ? `🎯 Target: ${g.name}` : `🎯 Target: nearest unvisited (${g.name})`);
-  updateHud();
+function faceToward(t){
+  const links = (pano && pano.getLinks() || []).filter(l => l && typeof l.heading === 'number');
+  if (!links.length || !S.pos) return;
+  const b = bearing(S.pos, t);
+  const best = links.reduce((x, y) => Math.abs(angDiff(x.heading, b)) <= Math.abs(angDiff(y.heading, b)) ? x : y);
+  S.travelHeading = best.heading; S.lookOffset = 0; applyPov(); showPhoto.last = null; showPhoto();
+  if (W.on){ W.curH = W.fromH = W.toH = S.travelHeading; W.camInit = false; }
 }
 
 /* ---------- map overlays ---------- */
@@ -1058,22 +963,21 @@ function rebuildOverlays(){
       strokeOpacity:.95, strokeWeight:4, clickable:false, zIndex:5}));
   }
   newCurLine();
-  refreshGoalMarkers();
+  updatePinMarkers();
   if (playerMk){ playerMk.setMap(null); playerMk = null; }
 }
-function refreshGoalMarkers(){
+// pins: the destination you're riding to, and the spot currently picked on the big map
+function pinMarker(ll, color, label){
+  if (G.Marker) return new G.Marker({map, position:{lat:ll.lat, lng:ll.lng}, zIndex:90, clickable:false,
+    icon:{path:google.maps.SymbolPath.CIRCLE, scale:11, fillColor:color, fillOpacity:1, strokeColor:'#fff', strokeWeight:3},
+    label:{text:label, fontSize:'12px', color:'#fff'}});
+  return new G.Circle({map, center:{lat:ll.lat, lng:ll.lng}, radius:30, fillColor:color, fillOpacity:.9, strokeColor:'#fff', strokeWeight:2, zIndex:90});
+}
+function updatePinMarkers(){
   if (!map) return;
-  goalMks.forEach(m => m.setMap(null)); goalMks = [];
-  for (const g of LOC().goals){
-    const done = !!(S.prog && S.prog.goals[g.id]);
-    goalMks.push(new G.Circle({map, center:{lat:g.lat, lng:g.lng}, radius:g.r, clickable:false,
-      strokeColor: done ? '#22c55e' : '#0ea5e9', strokeWeight:2, fillColor: done ? '#22c55e' : '#38bdf8', fillOpacity:.18, zIndex:3}));
-    if (G.Marker){
-      goalMks.push(new G.Marker({map, position:{lat:g.lat, lng:g.lng}, title:g.name, clickable:false, zIndex:6,
-        icon:{path:google.maps.SymbolPath.CIRCLE, scale:13, fillColor: done ? '#16a34a' : '#0284c7', fillOpacity:1, strokeColor:'#fff', strokeWeight:2},
-        label:{text: done ? '✓' : g.icon, fontSize:'15px', color:'#fff'}}));
-    }
-  }
+  pinMks.forEach(m => m.setMap(null)); pinMks = [];
+  if (S.dest) pinMks.push(pinMarker(S.dest, '#e11d48', '★'));
+  if (S.pick) pinMks.push(pinMarker(S.pick, '#2563eb', '?'));
 }
 function updatePlayer(){
   if (!map || !S.pos) return;
@@ -1087,40 +991,90 @@ function updatePlayer(){
     else playerMk.setCenter(S.pos);
   }
 }
+// what the map shows: attractions (sights, parks, churches), businesses, Street View roads
+function applyMapStyle(){
+  if (!map) return;
+  const st = S.settings, styles = [{featureType:'poi', stylers:[{visibility:'off'}]}];
+  if (st.mapSights) for (const f of ['poi.attraction', 'poi.park', 'poi.place_of_worship'])
+    styles.push({featureType:f, stylers:[{visibility:'on'}]});
+  if (st.mapBiz) styles.push({featureType:'poi.business', stylers:[{visibility:'on'}]});
+  map.setOptions({styles});
+  if (coverage) coverage.setMap(st.mapRoads ? map : null);
+  $('#fSights').classList.toggle('on', !!st.mapSights);
+  $('#fBiz').classList.toggle('on', !!st.mapBiz);
+  $('#fRoads').classList.toggle('on', !!st.mapRoads);
+}
+function toggleMapFilter(key){ S.settings[key] = !S.settings[key]; store.set('jeep.settings', S.settings); applyMapStyle(); }
 function openMap(){
   if (!map) return;
   bigOpen = true; document.body.classList.add('mapopen');
-  map.setOptions({gestureHandling:'greedy', zoomControl:true, mapTypeControl:true, mapTypeControlOptions:{position: google.maps.ControlPosition ? google.maps.ControlPosition.LEFT_BOTTOM : undefined}});
-  if (S.pos){ map.setCenter(S.pos); map.setZoom(13); }
+  map.setOptions({gestureHandling:'greedy', zoomControl:true, clickableIcons:true, mapTypeControl:true,
+    mapTypeControlOptions:{position: google.maps.ControlPosition ? google.maps.ControlPosition.LEFT_BOTTOM : undefined}});
+  if (S.pos){ map.setCenter(S.pos); map.setZoom(14); }
   renderSheet(); engineUpdate();
 }
 function closeMap(){
   if (!map) return;
-  bigOpen = false; jumpMode = false; document.body.classList.remove('mapopen', 'jump');
-  $('#jumpBtn').classList.remove('on');
-  map.setOptions({gestureHandling:'none', zoomControl:false, mapTypeControl:false});
+  bigOpen = false; document.body.classList.remove('mapopen');
+  S.pick = null; updatePinMarkers(); closeInfoWindows();
+  map.setOptions({gestureHandling:'none', zoomControl:false, clickableIcons:false, mapTypeControl:false});
   map.setZoom(16); if (S.pos) map.setCenter(S.pos);
   engineUpdate(); schedule(100);
 }
+// tap on the big map: an attraction icon (Google shows its name) or any spot
+async function pickPlace(ll, placeId){
+  const pick = S.pick = {lat:ll.lat, lng:ll.lng, poi:!!placeId, name:null};
+  updatePinMarkers(); renderSheet();
+  if (placeId){
+    const name = await placeName(placeId);
+    if (name && S.pick === pick){ pick.name = name; renderSheet(); }
+  }
+}
+// optional nicety: the attraction's name (needs "Places API (New)" on the key; otherwise Google's map label shows it)
+async function placeName(id){
+  if (placeName.off) return null;
+  try{
+    const lib = await google.maps.importLibrary('places');
+    const pl = new lib.Place({id}); await pl.fetchFields({fields:['displayName']});
+    return pl.displayName || null;
+  }catch(e){ placeName.off = true; console.info('Place names need the Places API (New); using map labels instead.'); return null; }
+}
+const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;'}[c]));
+function closeInfoWindows(){ document.querySelectorAll('#map .gm-ui-hover-effect').forEach(b => { try{ b.click(); }catch(e){} }); }
+async function rideToPick(){
+  const t = S.pick; if (!t) return;
+  toast('🚙 Finding the nearest street with Street View…', 2500);
+  let ok = false;
+  try{ ok = await jumpTo(t); }catch(e){ if (e.message === 'AUTH') return showAuthError(); }
+  if (!ok){ toast('No Street View road near this place – try a spot closer to a road'); return; }
+  S.dest = {lat:t.lat, lng:t.lng, reached:false, name:t.name}; S.pick = null;
+  const d = dist(S.pos, S.dest);
+  if (d <= 120) S.dest.reached = true;
+  updatePinMarkers(); faceToward(S.dest); setGear(0); closeMap(); updateHud();
+  toast(d > 120 ? `📍 Nearest street is ${fmtKm(d/1000)} away – the arrow at the top points to the place. Press ▲ GAS`
+                : '📍 You\'re there! Press ▲ GAS to explore around', 5000);
+}
 function renderSheet(){
-  const L = LOC(), P = S.prog;
-  const done = L.goals.filter(g => P.goals[g.id]).length;
-  const rating = P.delivered + P.missed ? Math.round(100*P.delivered/(P.delivered + P.missed)) + '%' : '—';
-  let h = `<div class="stats">
-    <span>Odometer <b>${P.odo.toFixed(1)} km</b></span><span>New roads <b>${P.newKm.toFixed(1)} km</b></span>
-    <span>Goals <b>${done}/${L.goals.length}</b></span><span>Fares <b>${money(P.money)}</b></span>
-    <span>Passengers <b>${P.delivered}</b></span><span>On time <b>${rating}</b></span></div>
-    <div class="note" style="margin-bottom:4px">Blue lines = roads with Street View · yellow = where you've driven. Tap a goal to see it.</div>`;
-  for (const g of L.goals){
-    const d = S.pos ? fmtKm(dist(S.pos, g)/1000) : '';
-    h += `<div class="goalrow ${P.goals[g.id] ? 'done' : ''}" data-g="${g.id}"><span class="gi">${P.goals[g.id] ? '✅' : g.icon}</span>
-          <span class="gn">${g.name}</span><span class="gd">${d}</span></div>`;
+  let h;
+  if (S.pick){
+    const d = S.pos ? fmtKm(dist(S.pos, S.pick)/1000) + ' from you' : '';
+    const title = S.pick.name ? '⭐ ' + esc(S.pick.name) : S.pick.poi ? '⭐ Place selected' : '📍 Spot selected';
+    h = `<div class="pick"><div><b>${title}</b>
+           <div class="note">${S.pick.poi && !S.pick.name ? 'Its name is shown on the map. ' : ''}${d}</div></div>
+         <button class="big-btn" id="rideBtn">🚙 Ride here</button>
+         <button class="pill" id="pickX">✕</button></div>`;
+  } else {
+    h = `<div class="note"><b>Tap an attraction</b> (or any spot) on the map, then <b>🚙 Ride here</b>.<br>
+         ⭐ sights, parks &amp; churches · 🏪 shops, food &amp; hotels · 🔵 roads with Street View · yellow = where you've driven.</div>`;
+    if (S.dest) h += `<div class="pick" style="margin-top:8px"><div><b>★ ${S.dest.name ? esc(S.dest.name) : 'Destination'}</b><div class="note">${S.pos ? fmtKm(dist(S.pos, S.dest)/1000) + ' away' : ''}</div></div>
+         <button class="pill" id="destShow">Show</button><button class="pill" id="destX">Clear</button></div>`;
   }
   $('#bigSheet').innerHTML = h;
-  $('#bigSheet').querySelectorAll('.goalrow').forEach(el => el.onclick = () => {
-    const g = L.goals.find(x => x.id === el.dataset.g); map.panTo(g); map.setZoom(14);
-    S.targetId = g.id; updateHud();
-  });
+  const on = (id, fn) => { const el = document.getElementById(id); if (el) el.onclick = fn; };
+  on('rideBtn', rideToPick);
+  on('pickX', () => { S.pick = null; updatePinMarkers(); renderSheet(); });
+  on('destShow', () => { map.panTo(S.dest); map.setZoom(16); });
+  on('destX', () => { S.dest = null; updatePinMarkers(); renderSheet(); updateHud(); });
 }
 
 /* =====================================================================
@@ -1192,8 +1146,9 @@ function drawRear(g, w, h){
     while (g.measureText(txt).width > w*0.25 && s > 20){ s -= 2; g.font = `900 ${s}px "Arial Black", Impact, sans-serif`; }
     g.lineWidth = s*0.16; g.strokeStyle = stroke; g.strokeText(txt, cx, cy); g.fillStyle = fill; g.fillText(txt, cx, cy);
   };
-  word(th.name[0], w*0.155, h*0.42, 86, th.css[0] === '#ffffff' ? '#1d4ed8' : th.css[0], '#ffffff');
-  word(th.name[1], w*0.845, h*0.42, 86, th.css[2], '#ffffff');
+  const art = LOC().art || th.name;
+  word(art[0], w*0.155, h*0.42, 86, th.css[0] === '#ffffff' ? '#1d4ed8' : th.css[0], '#ffffff');
+  word(art[1], w*0.845, h*0.42, 86, th.css[2], '#ffffff');
   g.font = 'italic 700 34px Georgia, serif'; g.fillStyle = '#1f2937';
   g.fillText(th.small[0], w*0.155, h*0.22); g.fillText(th.small[1], w*0.845, h*0.22);
 }
@@ -1202,8 +1157,9 @@ function drawSign(g, w, h){
   g.fillStyle = '#fbfbf7'; g.fillRect(0, 0, w, h); g.strokeStyle = '#64748b'; g.lineWidth = 6; g.strokeRect(3, 3, w - 6, h - 6);
   g.fillStyle = th.signColor; g.textAlign = 'center'; g.textBaseline = 'middle';
   let s = 58; g.font = `900 ${s}px "Arial Black", Impact, sans-serif`;
-  while (g.measureText(th.sign).width > w - 40 && s > 20){ s -= 2; g.font = `900 ${s}px "Arial Black", Impact, sans-serif`; }
-  g.fillText(th.sign, w/2, h/2 + 2);
+  const sign = LOC().rear || th.sign;
+  while (g.measureText(sign).width > w - 40 && s > 20){ s -= 2; g.font = `900 ${s}px "Arial Black", Impact, sans-serif`; }
+  g.fillText(sign, w/2, h/2 + 2);
 }
 
 function buildJeepney(T){
@@ -1430,6 +1386,7 @@ function cycleWorldCam(){
 }
 function updateViewBtn(){
   const c = WORLD_CAMS[S.settings.worldCam] || WORLD_CAMS.drone;
+  $('#modeBtn').textContent = W.on ? '👁 Street View' : '🌍 3D world';
   $('#viewBtn').textContent = W.on ? c.icon : (S.settings.view === 'chase' ? '🚐' : '🎥');
 }
 
@@ -1588,34 +1545,24 @@ async function setView(v){
 
 /* ---------- HUD ---------- */
 function updateHud(){
-  const L = LOC(), P = S.prog; if (!P) return;
+  const P = S.prog; if (!P) return;
   $('#spd').textContent = Math.round(S.gear ? S.speedKmh : 0);
   $('#gearLbl').textContent = S.gear ? S.gear : 'N';
   $('#odoLbl').textContent = P.odo.toFixed(1) + ' km';
-  const done = L.goals.filter(g => P.goals[g.id]).length;
-  $('#chipGoals').textContent = `${L.icon} ${done}/${L.goals.length}`;
-  $('#chipRiders').textContent = `👥 ${S.riders.length}`;
-  $('#chipRiders').hidden = !S.settings.passengers; $('#chipMoney').hidden = !S.settings.passengers;
-  $('#chipMoney').textContent = money(P.money);
-  $('#chipNew').textContent = `🆕 ${P.newKm.toFixed(1)} km`;
-  const g = currentTarget();
-  if (g){
-    $('#tName').textContent = (P.goals[g.id] ? '✅ ' : g.icon + ' ') + g.name;
-    if (S.pos){
-      $('#tDist').textContent = fmtKm(dist(S.pos, g)/1000) + (S.targetId ? '' : ' · nearest');
-      const rel = angDiff(bearing(S.pos, g), S.travelHeading + S.lookOffset);
-      $('#tArrow').style.transform = `rotate(${rel}deg)`;
-    }
-  }
+  // destination pill: distance + arrow to the place you picked on the map
+  const t = $('#target');
+  if (S.dest && S.pos){
+    t.hidden = false;
+    $('#tName').textContent = (S.dest.reached ? '★ Here: ' : '★ ') + (S.dest.name || 'Destination');
+    $('#tDist').textContent = fmtKm(dist(S.pos, S.dest)/1000);
+    $('#tArrow').style.transform = `rotate(${angDiff(bearing(S.pos, S.dest), S.travelHeading + S.lookOffset)}deg)`;
+  } else t.hidden = true;
   if (bigOpen) renderSheet();
 }
 function updateBanner(){
   const L = LOC(), b = $('#banner');
   let html = '', cls = '';
-  const want = S.riders.find(r => r.want && !r.missed);
-  if (want){ html = `🔔 <b>${L.ph.stop}</b> Press ■ STOP<br><span class="cd">${'●'.repeat(Math.max(0, want.left))}</span>`; cls = 'alert'; }
-  else if (S.hail){ html = `🙋 <b>${L.ph.hail}</b> Press ■ STOP to pick up<br><span class="cd">${'●'.repeat(S.hail.left)}</span>`; cls = 'hail'; }
-  else if (S.waitingTurn === 'choose'){ html = `↔️ <b>${L.ph.choose}</b><br>Junction – tap ◀ or ▶`; cls = 'turn'; }
+  if (S.waitingTurn === 'choose'){ html = `↔️ <b>${L.ph.choose}</b><br>Junction – tap ◀ or ▶`; cls = 'turn'; }
   else if (S.waitingTurn === 'dead'){ html = `⛔ <b>End of the road</b><br>Tap ↶ U-turn`; cls = 'turn'; }
   b.className = html ? 'show ' + cls : ''; if (html) b.innerHTML = html;
 }
@@ -1647,7 +1594,7 @@ async function chooseLoc(id, inGame){
   try{
     const ok = await jumpTo(LOC().start);
     if (!ok) toast('No Street View found near ' + LOC().startLabel);
-    else { toast(`${LOC().flag} ${LOC().ph.greet}`); say(LOC().ph.greet); }
+    else toast(`${LOC().flag} ${LOC().startLabel} – tap the map to pick a place`);
   }catch(e){ if (e.message === 'AUTH') showAuthError(); }
   updateHud();
 }
@@ -1657,7 +1604,7 @@ async function onStart(){
   const kv = $('#keyInput').value.trim();
   if (kv){ S.key = kv; store.set('jeep.key', kv); }
   if (!S.key){ $('#setupErr').textContent = 'Paste your Google Maps API key first (see “How to get a key”).'; $('#keyHelp').open = true; return; }
-  S.settings.passengers = $('#optPass').checked; S.settings.sound = $('#optSound').checked; S.settings.zoomFx = $('#optZoom').checked;
+  S.settings.sound = $('#optSound').checked; S.settings.zoomFx = $('#optZoom').checked;
   store.set('jeep.settings', S.settings);
   S.settings.photo = $('#optPhoto').checked;
   S.settings.view = $('#optChase').checked ? 'chase' : 'cab';
@@ -1676,7 +1623,8 @@ async function onStart(){
     if (!ok) throw new Error('No Street View found near ' + LOC().startLabel + '.');
     S.started = true;
     setGear(0); updateHud(); updateBanner();
-    toast(`${LOC().flag} ${LOC().ph.greet} Press ▲ GAS`, 3500); say(LOC().ph.greet);
+    applyMapStyle();
+    toast(`${LOC().flag} ${LOC().startLabel}. Tap the map (top right) to pick an attraction, or press ▲ GAS`, 5000);
     if (!S.settings.photo) setTimeout(() => { if (!S.settings.photo && !S.menuOpen)
       toast('Black screen instead of streets? Tap <b>☰</b> and switch on <b>📷 Photo mode</b>.', 6500); }, 8000);
     keepAwake(); schedule(200);
@@ -1694,7 +1642,7 @@ function showAuthError(){
 function openMenu(){
   if (!S.started) return;
   S.menuOpen = true; $('#menu').hidden = false;
-  $('#mPass').checked = S.settings.passengers; $('#mSound').checked = S.settings.sound; $('#mZoom').checked = S.settings.zoomFx;
+  $('#mSound').checked = S.settings.sound; $('#mZoom').checked = S.settings.zoomFx;
   $('#mPhoto').checked = S.settings.photo; $('#mWorld').checked = W.on;
   renderLocCards(); engineUpdate(); saveNow(); updateDiag();
 }
@@ -1712,11 +1660,14 @@ press($('#uturnBtn'), uTurn);
 press($('#blL'), () => setBlinker(S.blinker === 'L' ? null : 'L'));
 press($('#blR'), () => setBlinker(S.blinker === 'R' ? null : 'R'));
 press($('#wheelBtn'), sfx.horn);
-press($('#target'), cycleTarget);
+press($('#target'), openMap);
 press($('#mapHit'), openMap);
 press($('#closeMap'), closeMap);
 press($('#meBtn'), () => { if (S.pos){ map.panTo(S.pos); map.setZoom(15); } });
-press($('#jumpBtn'), () => { jumpMode = !jumpMode; $('#jumpBtn').classList.toggle('on', jumpMode); document.body.classList.toggle('jump', jumpMode); });
+press($('#fSights'), () => toggleMapFilter('mapSights'));
+press($('#fBiz'), () => toggleMapFilter('mapBiz'));
+press($('#fRoads'), () => toggleMapFilter('mapRoads'));
+press($('#modeBtn'), () => setWorld(!W.on));
 press($('#menuBtn'), openMenu);
 press($('#resumeBtn'), closeMenu);
 press($('#homeBtn'), async () => { closeMenu(); setGear(0); toast('Back to ' + LOC().startLabel + '…'); await jumpTo(LOC().start).catch(() => {}); });
@@ -1751,10 +1702,9 @@ function updateDiag(){
   }
   $('#diag').textContent = `Diagnostics · Street View: ${S.svStatus || (pano ? 'loading' : '—')} · WebGL: ${gl ? 'yes' : 'no'} · view: ${W.on ? '3D world' : S.settings.photo ? 'photo' : 'interactive'}${world}`;
 }
-for (const [id, key] of [['#mPass', 'passengers'], ['#mSound', 'sound'], ['#mZoom', 'zoomFx']]){
+for (const [id, key] of [['#mSound', 'sound'], ['#mZoom', 'zoomFx']]){
   $(id).addEventListener('change', e => {
     S.settings[key] = e.target.checked; store.set('jeep.settings', S.settings);
-    if (key === 'passengers' && !e.target.checked){ S.hail = null; S.riders = []; updateBanner(); }
     if (key === 'zoomFx' && pano){ S.curZoom = -1; }
     engineUpdate(); updateHud();
   });
@@ -1792,7 +1742,7 @@ press($('#viewBtn'), () => W.on ? cycleWorldCam() : setView(S.settings.view === 
   $('#fileWarn').hidden = !local;
   $('#keyInput').value = S.key;
   if (!S.key) $('#keyHelp').open = true;
-  $('#optPass').checked = S.settings.passengers; $('#optSound').checked = S.settings.sound; $('#optZoom').checked = S.settings.zoomFx;
+  $('#optSound').checked = S.settings.sound; $('#optZoom').checked = S.settings.zoomFx;
   $('#optPhoto').checked = S.settings.photo;
   $('#optChase').checked = S.settings.view === 'chase';
   applyLocUI();
