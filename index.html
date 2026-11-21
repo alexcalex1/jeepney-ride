@@ -1385,6 +1385,7 @@ async function loadWorld(){
     tiles.addEventListener('load-root-tileset', () => { W.rootLoaded = true; });
     tiles.addEventListener('load-error', e => {
       console.warn('3D tiles error', e.error || e);
+      W.lastErr = String(e.error && e.error.message || e.error || 'error').slice(0, 90);
       if (!W.rootLoaded) worldFailed(/40[13]/.test(String(e.error)) ? 'key' : 'net');
     });
     const scene = new T.Scene();
@@ -1415,6 +1416,14 @@ function worldFailed(why){
   W.ready = false; W.loading = null; W.rootLoaded = false;
 }
 
+// cast a ray straight down from `startAbove` metres over point p; returns the ground offset along `up`, or null
+function rayDown(p, up, startAbove){
+  W.ray.set(W.v[5].copy(p).addScaledVector(up, startAbove), up.clone().negate());
+  W.ray.far = startAbove + 2000;
+  const hit = W.ray.intersectObject(W.tiles.group, true)[0];
+  return hit ? hit.point.sub(p).dot(up) : null;
+}
+
 function geoToWorld(lat, lng, target){
   W.tiles.ellipsoid.getCartographicToPosition(lat*D2R, lng*D2R, 0, target);
   return target.applyMatrix4(W.tiles.group.matrixWorld);
@@ -1432,6 +1441,7 @@ function worldArrive(pos, teleport){
   const now = performance.now();
   if (teleport || !W.cur || dist(W.cur, pos) > 150){
     W.cur = W.from = W.to = {...pos}; W.curH = W.fromH = W.toH = S.travelHeading; W.t0 = now; W.dur = 1; W.camInit = false; W.lastArr = 0;
+    W.groundInit = false; W.searchT = now;          // new place: find its ground again
     return;
   }
   W.period = W.lastArr ? W.period*0.6 + (now - W.lastArr)*0.4 : GEAR_MS[Math.max(1, S.gear)];
@@ -1466,23 +1476,42 @@ function worldRender(now){
     up.crossVectors(e, n).normalize();
     const h = W.curH*D2R;
     dir.copy(n).multiplyScalar(Math.cos(h)).addScaledVector(e, Math.sin(h)).normalize();
-    // find the road surface under the jeepney (photogrammetry ground), smoothed
+    // Find the road surface under the jeepney. Google's tiles are measured from the ellipsoid, and real ground
+    // sits tens of metres above it, so until we find it we look from high above (tiles only answer rays where
+    // the camera can see them). Once grounded, rays start just above the jeepney so tree canopies and bridges
+    // over the road are ignored.
     if (now - W.rayT > 110){
       W.rayT = now;
-      W.ray.set(tmp.copy(p).addScaledVector(up, 1500), up.clone().negate());
-      const hit = W.ray.intersectObject(tiles.group, true)[0];
-      if (hit){ const off = hit.point.sub(p).dot(up); W.gTarget = off; if (W.gOff === null || !W.groundInit){ W.gOff = off; W.groundInit = true; } }
+      const lowStart = W.groundInit ? W.gOff + 8 : 4000;
+      let hit = rayDown(p, up, lowStart);
+      if (!hit && W.groundInit) hit = rayDown(p, up, W.gOff + 60);
+      if (hit !== null){
+        if (!W.groundInit){
+          const st = tiles.stats || {};
+          const settled = (st.downloading || 0) + (st.parsing || 0) === 0 || now - W.searchT > 6000;
+          if (settled){ W.gOff = W.gTarget = hit; W.groundInit = true; W.camInit = false; toast(`🌍 Road found (${hit >= 0 ? '+' : ''}${hit.toFixed(0)} m)`, 2000); }
+        } else {
+          W.gTarget = W.gTarget + Math.max(-1.5, Math.min(1.5, hit - W.gTarget));    // ignore sudden spikes
+        }
+      }
     }
-    if (W.gTarget !== null) W.gOff += (W.gTarget - W.gOff)*Math.min(1, Math.max(0.05, (now - (W.lastRender || now))/1000*8));
+    const fdt = Math.min(0.1, (now - (W.lastRender || now))/1000); W.lastRender = now;
+    if (W.groundInit) W.gOff += (W.gTarget - W.gOff)*Math.min(1, fdt*8);
     p.addScaledVector(up, W.gOff);
     CH.car.position.copy(p); CH.car.up.copy(up); CH.car.lookAt(tmp.copy(p).sub(dir));
-    // chase camera
-    const fdt = Math.min(0.1, (now - (W.lastRender || now))/1000); W.lastRender = now;
-    const want = tmp.copy(p).addScaledVector(dir, -9.5).addScaledVector(up, 4.2);
-    if (!W.camInit || W.cam.position.distanceTo(want) > 25){ W.cam.position.copy(want); W.camInit = true; }
-    else W.cam.position.lerp(want, 1 - Math.exp(-fdt*7));          // same follow feel at any frame rate
+    CH.car.visible = W.groundInit;
     W.cam.up.copy(up);
-    W.cam.lookAt(tmp.copy(p).addScaledVector(up, 1.6).addScaledVector(dir, 5));
+    if (!W.groundInit){
+      // searching: aerial view over the jeepney so the real ground loads
+      W.cam.position.copy(p).addScaledVector(up, 380).addScaledVector(dir, -160);
+      W.cam.lookAt(p);
+    } else {
+      // chase camera
+      const want = tmp.copy(p).addScaledVector(dir, -9.5).addScaledVector(up, 4.2);
+      if (!W.camInit || W.cam.position.distanceTo(want) > 25){ W.cam.position.copy(want); W.camInit = true; }
+      else W.cam.position.lerp(want, 1 - Math.exp(-fdt*7));          // same follow feel at any frame rate
+      W.cam.lookAt(tmp.copy(p).addScaledVector(up, 1.6).addScaledVector(dir, 5));
+    }
   }
   W.cam.updateMatrixWorld();
   tiles.update();
@@ -1505,16 +1534,19 @@ async function setWorld(on){
     clearTimeout(W.watchdog);
     W.watchdog = setTimeout(() => { if (W.on && !W.rootLoaded) worldFailed('net'); }, 20000);
     W.scene.add(CH.car); CH.puffs.forEach(p => W.scene.add(p.sp));
-    CH.yaw = 0; W.lean = 0; W.groundInit = false; W.gTarget = null; W.gOff = 0;
+    CH.yaw = 0; W.lean = 0; W.groundInit = false; W.gTarget = 0; W.gOff = 0; W.searchT = performance.now();
     if (W.rootLoaded && dist(S.pos, W.origin) > 500){ W.origin = {...S.pos}; W.reo.transformLatLonHeightToOrigin(S.pos.lat*D2R, S.pos.lng*D2R, 0); }
     worldArrive(S.pos, true);
     resizeWorld(); CH.lastT = 0; CH.renderer.setAnimationLoop(chaseFrame);
-    setTimeout(() => { if (W.on) toast('🌍 3D world. Flat satellite ground with no buildings = Google has no 3D model here.', 6000); }, 4000);
+    toast('🌍 Finding the road in Google\'s 3D model…', 4000);
+    clearTimeout(W.groundWatch);
+    W.groundWatch = setTimeout(() => { if (W.on && !W.groundInit)
+      toast('🌍 No 3D ground found here. Google may have no 3D data for this place – open ☰ to see tile diagnostics.', 9000); }, 30000);
   } else {
     W.on = false; document.body.classList.remove('world');
     if (CH.ready){
       CH.scene.add(CH.car); CH.puffs.forEach(p => CH.scene.add(p.sp));
-      CH.car.quaternion.identity(); CH.car.up.set(0, 1, 0); resizeChase();
+      CH.car.quaternion.identity(); CH.car.up.set(0, 1, 0); CH.car.visible = true; resizeChase();
       if (S.settings.view !== 'chase') CH.renderer.setAnimationLoop(null);
     }
   }
@@ -1691,7 +1723,13 @@ $('#mPhoto').addEventListener('change', e => { setPhotoMode(e.target.checked); u
 })();
 function updateDiag(){
   let gl = false; try{ const c = document.createElement('canvas'); gl = !!(c.getContext('webgl') || c.getContext('experimental-webgl')); }catch(e){}
-  $('#diag').textContent = `Diagnostics · Street View: ${S.svStatus || (pano ? 'loading' : '—')} · WebGL: ${gl ? 'yes' : 'no'} · view: ${W.on ? '3D world' + (W.rootLoaded ? ' (tiles OK)' : ' (no tiles yet)') : S.settings.photo ? 'photo' : 'interactive'}`;
+  let world = '';
+  if (W.tiles){
+    const st = W.tiles.stats || {};
+    world = ` · 3D: root ${W.rootLoaded ? 'OK' : 'not loaded'}, tiles ${st.loaded || 0} loaded / ${st.downloading || 0} downloading / ${st.failed || 0} failed` +
+            `, ground ${W.groundInit ? (W.gOff >= 0 ? '+' : '') + W.gOff.toFixed(0) + ' m' : 'not found'}` + (W.lastErr ? `, last error: ${W.lastErr}` : '');
+  }
+  $('#diag').textContent = `Diagnostics · Street View: ${S.svStatus || (pano ? 'loading' : '—')} · WebGL: ${gl ? 'yes' : 'no'} · view: ${W.on ? '3D world' : S.settings.photo ? 'photo' : 'interactive'}${world}`;
 }
 for (const [id, key] of [['#mPass', 'passengers'], ['#mSound', 'sound'], ['#mZoom', 'zoomFx']]){
   $(id).addEventListener('change', e => {
