@@ -13,3 +13,5 @@ Drive a jeepney through real Google Street View — start in **Urdaneta, Pangasi
 The game needs your own Google Maps JavaScript API key. It is typed into the page and stored only in your browser — it is not in this repo.
 Restrict the key to the website `https://alexcalex1.github.io/*` and to the Maps JavaScript API.
 Each press of **Start** uses one Dynamic Street View session.
+
+**Black screen instead of streets?** Open ☰ and switch on **📷 Photo mode**. It shows Street View as plain pictures and needs the **Street View Static API** enabled for the same key (one image per hop).

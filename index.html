@@ -28,9 +28,12 @@ button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
   background:
     repeating-linear-gradient(100deg,transparent 0 46px,rgba(255,255,255,.13) 46px 48px) left top/24% 100% no-repeat,
     repeating-linear-gradient(80deg,transparent 0 46px,rgba(255,255,255,.13) 46px 48px) right top/24% 100% no-repeat;
-  -webkit-mask:linear-gradient(90deg,#000,transparent 24%,transparent 76%,#000);
-          mask:linear-gradient(90deg,#000,transparent 24%,transparent 76%,#000);
   animation:streak .45s linear infinite}
+#photo{position:fixed;left:0;right:0;top:0;bottom:calc(var(--dash-h) + var(--hood-h));overflow:hidden;background:#1f2937;touch-action:none}
+#photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity .35s;
+  transform-origin:50% 55%;-webkit-user-drag:none;pointer-events:none}
+#photo img.top{opacity:1}
+#photo .attr{position:absolute;left:6px;bottom:4px;font-size:11px;color:#fff;text-shadow:0 1px 3px #000;z-index:2}
 @keyframes streak{to{background-position:left 0 top 48px,right 0 top 48px}}
 
 /* ---------- Jeepney cab ---------- */
@@ -106,8 +109,8 @@ body.sk #sign{color:#1d4ed8}
 /* ---------- HUD ---------- */
 #hud{position:fixed;top:calc(var(--roof-h) + 16px);left:14px;z-index:7;display:flex;flex-direction:column;gap:6px;
   max-width:calc(50vw - 70px)}
-#target{display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:rgba(0,0,0,.62);
-  backdrop-filter:blur(4px);font-size:12px;text-align:left;border:1px solid rgba(255,255,255,.18)}
+#target{display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:rgba(0,0,0,.66);
+  font-size:12px;text-align:left;border:1px solid rgba(255,255,255,.18)}
 #tArrow{width:22px;height:22px;flex:none;transition:transform .5s}
 #tArrow path{fill:#38bdf8}
 #tText{display:flex;flex-direction:column;min-width:0}
@@ -117,11 +120,11 @@ body.sk #sign{color:#1d4ed8}
 .chip{padding:3px 8px;border-radius:999px;background:rgba(0,0,0,.6);font-size:11px;border:1px solid rgba(255,255,255,.15);
   font-variant-numeric:tabular-nums}
 
-#mapWrap{position:fixed;top:calc(var(--roof-h) + 16px);right:14px;width:104px;height:104px;border-radius:50%;
+#mapWrap{position:fixed;top:calc(var(--roof-h) + 16px);right:14px;width:112px;height:112px;border-radius:16px;
   overflow:hidden;border:3px solid #cbd5e1;z-index:8;background:#e5e7eb;box-shadow:0 4px 14px rgba(0,0,0,.5)}
 #map{position:absolute;inset:0}
 #mapHit{position:absolute;inset:0;z-index:2}
-#mapLabel{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);font-size:10px;font-weight:800;
+#mapLabel{position:absolute;top:4px;left:50%;transform:translateX(-50%);font-size:10px;font-weight:800;
   background:rgba(0,0,0,.6);padding:1px 6px;border-radius:6px;z-index:3;pointer-events:none}
 body.mapopen #mapWrap{top:0;left:0;right:0;bottom:calc(38vh + env(safe-area-inset-bottom) + 14px);width:auto;height:auto;border-radius:0;border:0;z-index:40}
 body.mapopen::before{content:"";position:fixed;inset:0;background:#0b1220;z-index:39}
@@ -210,6 +213,7 @@ kbd{background:#1e293b;border:1px solid #475569;border-radius:5px;padding:0 5px;
 <body class="ph">
 
 <div id="sv"></div>
+<div id="photo" hidden><img alt=""><img alt=""><span class="attr">Imagery © Google</span></div>
 <div id="speedfx"></div>
 
 <!-- Cab overlay -->
@@ -337,10 +341,10 @@ kbd{background:#1e293b;border:1px solid #475569;border-radius:5px;padding:0 5px;
       <ol>
         <li>Open <a href="https://console.cloud.google.com/" target="_blank" rel="noopener" style="color:#7dd3fc">console.cloud.google.com</a> and create a project (e.g. “Jeepney”).</li>
         <li><b>Billing</b> → link a billing account (a card is required). Google includes free monthly usage per API, and this game uses <b>one Street View session each time you press Start</b>.</li>
-        <li><b>APIs &amp; Services → Library</b> → enable <b>Maps JavaScript API</b>.</li>
+        <li><b>APIs &amp; Services → Library</b> → enable <b>Maps JavaScript API</b> (and <b>Street View Static API</b> if you want Photo mode).</li>
         <li><b>APIs &amp; Services → Credentials → Create credentials → API key</b>. Copy it here.</li>
         <li>Edit the key → <b>Application restrictions: Websites</b> → add <code id="originHint">https://your-site.example/*</code><br>
-            <b>API restrictions</b> → Maps JavaScript API → Save.</li>
+            <b>API restrictions</b> → Maps JavaScript API (+ Street View Static API) → Save.</li>
         <li>Optional safety net: <b>Billing → Budgets &amp; alerts</b> → set a small budget alert, and/or lower the daily limits in the API's <b>Quotas</b> page.</li>
       </ol>
       <p id="fileWarn" class="err" hidden>You opened this file directly from disk. Google's “Websites” restriction can't match local files — upload this file to a website (any HTTPS hosting) and open it from there.</p>
@@ -356,7 +360,8 @@ kbd{background:#1e293b;border:1px solid #475569;border-radius:5px;padding:0 5px;
     <h2>3 · Options</h2>
     <label class="opt"><input type="checkbox" id="optPass" checked> Pasahero mode – passengers wave, you stop, they pay</label>
     <label class="opt"><input type="checkbox" id="optSound" checked> Sound (diesel engine, horn, voices)</label>
-    <label class="opt"><input type="checkbox" id="optZoom" checked> Motion effect (camera pushes forward between photos)</label>
+    <label class="opt"><input type="checkbox" id="optZoom"> Motion effect (camera pushes forward between photos)</label>
+    <label class="opt"><input type="checkbox" id="optPhoto"> 📷 Photo mode – use if the street view stays black (needs Street View Static API)</label>
   </div>
 
   <button id="startBtn" class="big-btn">START ENGINE</button>
@@ -382,6 +387,8 @@ kbd{background:#1e293b;border:1px solid #475569;border-radius:5px;padding:0 5px;
     <label class="opt"><input type="checkbox" id="mPass"> Pasahero mode</label>
     <label class="opt"><input type="checkbox" id="mSound"> Sound</label>
     <label class="opt"><input type="checkbox" id="mZoom"> Motion effect</label>
+    <label class="opt"><input type="checkbox" id="mPhoto"> 📷 Photo mode – if the street view is black. Swipe left/right to look around. Needs <b>Street View Static API</b> enabled for your key.</label>
+    <p class="note" id="diag"></p>
   </div>
   <div class="menu-actions">
     <button id="resumeBtn" style="background:#b45309;border-color:#f59e0b;font-weight:800">▶ Resume driving</button>
@@ -482,7 +489,7 @@ const money = v => { const L = LOC(); return L.cur + v.toFixed(L.dec); };
 const GEAR_MS = [0, 1500, 950, 620, 400];
 const S = {
   key: store.get('jeep.key', ''),
-  settings: Object.assign({loc:'pangasinan', passengers:true, sound:true, zoomFx:true}, store.get('jeep.settings', {})),
+  settings: Object.assign({loc:'pangasinan', passengers:true, sound:true, zoomFx:false, photo:false}, store.get('jeep.settings', {})),
   started:false, menuOpen:false,
   gear:0, blinker:null, blinkHops:0, busy:false, waitingTurn:null,
   travelHeading:0, lookOffset:0, userLooking:false,
@@ -490,6 +497,7 @@ const S = {
   prog:null, trail:[], cells:new Set(), recentCells:[], hail:null, riders:[], targetId:null
 };
 if (!LOCS[S.settings.loc]) S.settings.loc = 'pangasinan';
+if (!S.settings.v2){ S.settings.zoomFx = false; S.settings.v2 = true; store.set('jeep.settings', S.settings); }   // motion effect now opt-in
 const paused = () => S.menuOpen || bigOpen || document.hidden || !S.started;
 
 /* ---------- small UI helpers ---------- */
@@ -606,11 +614,7 @@ async function initGoogle(){
         Circle: mp.Circle, Marker: mk.Marker || google.maps.Marker || null };
 
   svs = new G.StreetViewService();
-  pano = new G.StreetViewPanorama($('#sv'), {
-    disableDefaultUI:true, clickToGo:false, linksControl:false, panControl:false, zoomControl:false,
-    addressControl:false, fullscreenControl:false, motionTracking:false, motionTrackingControl:false,
-    enableCloseButton:false, scrollwheel:false, disableDoubleClickZoom:true, showRoadLabels:true, visible:true
-  });
+  // the panorama itself is created later (createPano), once its container is on screen
   const start = LOC().start;
   map = new G.Map($('#map'), {
     center:start, zoom:16, disableDefaultUI:true, gestureHandling:'none', keyboardShortcuts:false,
@@ -629,6 +633,25 @@ async function initGoogle(){
 
   computeBaseZoom();
   requestAnimationFrame(fxLoop);
+}
+
+// Standard Street View setup: create the panorama with its first pano + view in the constructor,
+// while #sv is visible. Resolves when the first panorama's data has arrived.
+function createPano(id){
+  pano = new G.StreetViewPanorama($('#sv'), {
+    pano:id, pov:{heading:norm(S.travelHeading), pitch:0}, zoom:1, visible:true,
+    disableDefaultUI:true, clickToGo:false, linksControl:false, panControl:false, zoomControl:false,
+    addressControl:false, fullscreenControl:false, motionTracking:false, motionTrackingControl:false,
+    enableCloseButton:false, scrollwheel:false, disableDoubleClickZoom:true, showRoadLabels:true
+  });
+  pano.addListener('status_changed', () => { S.svStatus = pano.getStatus ? pano.getStatus() : ''; });
+  return new Promise(resolve => {
+    let done = false;
+    const fin = () => { if (done) return; done = true; clearTimeout(t); resolve(); };
+    pano.addListener('links_changed', fin);
+    pano.addListener('status_changed', () => setTimeout(fin, 250));
+    const t = setTimeout(fin, 4500);
+  });
 }
 
 function isAuthError(e){
@@ -677,8 +700,43 @@ function applyPov(){
 }
 
 function computeBaseZoom(){
-  S.baseZoom = innerHeight > innerWidth ? 0.55 : 1.0;
+  S.baseZoom = 1;      // whole-number zoom: safest for every Street View renderer
   S.curZoom = -1;
+}
+
+/* ---------- Photo mode: plain Street View images (Street View Static API) ---------- */
+let photoFront = 0;
+function photoUrl(id, heading){
+  const el = $('#photo'), w = Math.max(1, el.clientWidth), h = Math.max(1, el.clientHeight), ar = w/h;
+  let W, H; if (ar >= 1){ W = 640; H = Math.max(200, Math.round(640/ar)); } else { H = 640; W = Math.max(200, Math.round(640*ar)); }
+  const fov = ar >= 1 ? 100 : 80;
+  return 'https://maps.googleapis.com/maps/api/streetview?size=' + W + 'x' + H + '&pano=' + encodeURIComponent(id) +
+         '&heading=' + heading.toFixed(1) + '&pitch=0&fov=' + fov + '&return_error_code=true&key=' + encodeURIComponent(S.key);
+}
+function showPhoto(){
+  if (!S.settings.photo || !pano || !pano.getPano()) return;
+  const url = photoUrl(pano.getPano(), norm(S.travelHeading + S.lookOffset));
+  if (url === showPhoto.last) return;
+  showPhoto.last = url;
+  const imgs = $('#photo').querySelectorAll('img'), back = imgs[1 - photoFront];
+  back.onload = () => {
+    if (back.src !== url) return;
+    back.style.transform = 'scale(1)';
+    back.classList.add('top'); imgs[photoFront].classList.remove('top');
+    photoFront = 1 - photoFront; S.photoT = performance.now();
+  };
+  back.onerror = () => {
+    if (showPhoto.warned) return; showPhoto.warned = true;
+    toast('📷 Photo mode needs the <b>Street View Static API</b> enabled for your key (Google Cloud → APIs &amp; Services → Library).', 7000);
+  };
+  back.src = url;
+}
+function setPhotoMode(on){
+  S.settings.photo = on; store.set('jeep.settings', S.settings);
+  $('#photo').hidden = !on;
+  $('#sv').style.visibility = on ? 'hidden' : 'visible';
+  showPhoto.last = null; showPhoto.warned = false;
+  if (on) showPhoto();
 }
 
 /* ---------- jumping / teleport ---------- */
@@ -693,7 +751,8 @@ async function jumpTo(ll){
     if (ch != null) S.travelHeading = ch;
     else if (data.links && data.links.length) S.travelHeading = data.links[0].heading;
     S.lookOffset = 0; S.waitingTurn = null; S.blinker = null; S.pos = null; S.speedKmh = 0;
-    await setPanoAndWait(data.location.pano);
+    if (!pano) await createPano(data.location.pano);
+    else await setPanoAndWait(data.location.pano);
     // face along the road: snap to the link closest to the camera heading
     const links = (pano.getLinks() || []).filter(l => l && typeof l.heading === 'number');
     if (links.length){
@@ -786,6 +845,7 @@ function onArrive(){
   S.trail[S.trail.length - 1].push([+pos.lat.toFixed(5), +pos.lng.toFixed(5)]);
   if (curLine) curLine.getPath().push(new google.maps.LatLng(pos.lat, pos.lng));
   updatePlayer();
+  showPhoto();
   if (!bigOpen && map) map.panTo(pos);
   bump();
   checkGoals();
@@ -800,12 +860,16 @@ function fxLoop(){
   const now = performance.now();
   if (now - S.lastFx < 50) return;
   S.lastFx = now;
-  let z = S.baseZoom;
-  if (S.settings.zoomFx && S.gear > 0 && !S.waitingTurn && !paused()){
-    const ph = Math.min(1, (now - S.lastArriveT)/GEAR_MS[S.gear]);
-    z += ph*(0.06 + 0.035*S.gear);
+  const moving = S.settings.zoomFx && S.gear > 0 && !S.waitingTurn && !paused();
+  if (S.settings.photo){
+    const img = $('#photo img.top');
+    if (img){ const ph = moving ? Math.min(1, (now - (S.photoT || now))/GEAR_MS[S.gear]) : 0;
+              img.style.transform = `scale(${(1 + ph*(0.05 + 0.03*S.gear)).toFixed(3)})`; }
+  } else {
+    let z = S.baseZoom;
+    if (moving) z += Math.min(1, (now - S.lastArriveT)/GEAR_MS[S.gear])*(0.06 + 0.035*S.gear);
+    if (Math.abs(z - S.curZoom) > 0.004){ S.curZoom = z; pano.setZoom(z); }
   }
-  if (Math.abs(z - S.curZoom) > 0.004){ S.curZoom = z; pano.setZoom(z); }
   // speed decay when stuck/stopped
   if (now - S.lastArriveT > 2600 || S.gear === 0){ S.speedKmh *= 0.9; if (S.speedKmh < 0.5) S.speedKmh = 0; $('#spd').textContent = Math.round(S.speedKmh); }
 }
@@ -836,7 +900,7 @@ function pulseBlinkers(on){ $('#blL').classList.toggle('pulse', on); $('#blR').c
 function uTurn(){
   S.travelHeading = norm(S.travelHeading + 180); S.lookOffset = 0;
   S.waitingTurn = null; pulseBlinkers(false); setBlinker(null);
-  turnWheel(180); applyPov(); updateBanner(); schedule(300);
+  turnWheel(180); applyPov(); showPhoto(); updateBanner(); schedule(300);
 }
 function turnWheel(a){
   const w = $('#wheelBtn'); w.style.transform = `rotate(${Math.max(-120, Math.min(120, a))}deg)`;
@@ -1080,22 +1144,27 @@ async function onStart(){
   if (!S.key){ $('#setupErr').textContent = 'Paste your Google Maps API key first (see “How to get a key”).'; $('#keyHelp').open = true; return; }
   S.settings.passengers = $('#optPass').checked; S.settings.sound = $('#optSound').checked; S.settings.zoomFx = $('#optZoom').checked;
   store.set('jeep.settings', S.settings);
+  S.settings.photo = $('#optPhoto').checked;
+  store.set('jeep.settings', S.settings);
   const btn = $('#startBtn'); btn.disabled = true; btn.textContent = 'Starting the engine…'; $('#setupErr').textContent = '';
   try{
     await loadMaps(S.key);
-    if (!pano) await initGoogle();
+    if (!svs) await initGoogle();
     applyLocUI(); loadProgress(S.settings.loc); rebuildOverlays();
+    $('#setup').hidden = true;              // Street View must start in a visible container
+    setPhotoMode(S.settings.photo);
     const ok = await jumpTo(LOC().start);
     if (authFailed) return;
     if (!ok) throw new Error('No Street View found near ' + LOC().startLabel + '.');
     S.started = true;
-    $('#setup').hidden = true;
     setGear(0); updateHud(); updateBanner();
     toast(`${LOC().flag} ${LOC().ph.greet} Press ▲ GAS`, 3500); say(LOC().ph.greet);
+    if (!S.settings.photo) setTimeout(() => { if (!S.settings.photo && !S.menuOpen)
+      toast('Black screen instead of streets? Tap <b>☰</b> and switch on <b>📷 Photo mode</b>.', 6500); }, 8000);
     keepAwake(); schedule(200);
   }catch(e){
     if (e.message === 'AUTH' || authFailed){ showAuthError(); }
-    else $('#setupErr').textContent = e.message || String(e);
+    else { $('#setup').hidden = false; $('#setupErr').textContent = e.message || String(e); }
   }finally{ btn.disabled = false; btn.textContent = 'START ENGINE'; }
 }
 
@@ -1107,7 +1176,8 @@ function openMenu(){
   if (!S.started) return;
   S.menuOpen = true; $('#menu').hidden = false;
   $('#mPass').checked = S.settings.passengers; $('#mSound').checked = S.settings.sound; $('#mZoom').checked = S.settings.zoomFx;
-  renderLocCards(); engineUpdate(); saveNow();
+  $('#mPhoto').checked = S.settings.photo;
+  renderLocCards(); engineUpdate(); saveNow(); updateDiag();
 }
 function closeMenu(){ S.menuOpen = false; $('#menu').hidden = true; engineUpdate(); schedule(100); }
 
@@ -1141,6 +1211,21 @@ press($('#fsBtn'), () => { const d = document.documentElement; (d.requestFullscr
 press($('#authRetry'), () => { store.del('jeep.key'); location.reload(); });
 press($('#startBtn'), onStart);
 press($('#keyShow'), () => { const i = $('#keyInput'); i.type = i.type === 'password' ? 'text' : 'password'; $('#keyShow').textContent = i.type === 'password' ? 'Show' : 'Hide'; });
+$('#mPhoto').addEventListener('change', e => { setPhotoMode(e.target.checked); updateDiag(); });
+(function photoSwipe(){   // in photo mode, swipe left/right to look around
+  const el = $('#photo'); let x0 = null;
+  el.addEventListener('pointerdown', e => { x0 = e.clientX; });
+  el.addEventListener('pointerup', e => {
+    if (x0 == null) return; const dx = e.clientX - x0; x0 = null;
+    if (Math.abs(dx) < 40) return;
+    S.lookOffset = Math.max(-135, Math.min(135, S.lookOffset + (dx < 0 ? 45 : -45)));
+    applyPov(); showPhoto(); updateHud();
+  });
+})();
+function updateDiag(){
+  let gl = false; try{ const c = document.createElement('canvas'); gl = !!(c.getContext('webgl') || c.getContext('experimental-webgl')); }catch(e){}
+  $('#diag').textContent = `Diagnostics · Street View: ${S.svStatus || (pano ? 'loading' : '—')} · WebGL: ${gl ? 'yes' : 'no'} · view: ${S.settings.photo ? 'photo' : 'interactive'}`;
+}
 for (const [id, key] of [['#mPass', 'passengers'], ['#mSound', 'sound'], ['#mZoom', 'zoomFx']]){
   $(id).addEventListener('change', e => {
     S.settings[key] = e.target.checked; store.set('jeep.settings', S.settings);
@@ -1180,6 +1265,7 @@ addEventListener('resize', () => computeBaseZoom());
   $('#keyInput').value = S.key;
   if (!S.key) $('#keyHelp').open = true;
   $('#optPass').checked = S.settings.passengers; $('#optSound').checked = S.settings.sound; $('#optZoom').checked = S.settings.zoomFx;
+  $('#optPhoto').checked = S.settings.photo;
   applyLocUI();
   if ('speechSynthesis' in window) speechSynthesis.getVoices();
 })();
