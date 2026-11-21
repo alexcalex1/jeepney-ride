@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#3a0a0a">
+<title>Jeepney Ride · Street View</title>
+<style>
+:root{
+  --roof-h: calc(52px + env(safe-area-inset-top));
+  --hood-h: clamp(52px, 11vh, 110px);
+  --dash-h: calc(124px + env(safe-area-inset-bottom));
+  --c1:#d62828; --c2:#fcbf49; --c3:#1d4ed8;
+}
+body.sk{ --c1:#f8fafc; --c2:#1d4ed8; --c3:#d62828; }
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;overflow:hidden;background:#0b0b0f;color:#f8fafc;
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;touch-action:manipulation;
+  user-select:none;-webkit-user-select:none}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+[hidden]{display:none!important}
+
+/* ---------- Street View area (ends at the hood so Google's logo stays visible) ---------- */
+#sv{position:fixed;left:0;right:0;top:0;bottom:calc(var(--dash-h) + var(--hood-h));
+  background:linear-gradient(#7dd3fc 0%,#bae6fd 45%,#94a3b8 46%,#475569 100%)}
+#speedfx{position:fixed;left:0;right:0;top:var(--roof-h);bottom:calc(var(--dash-h) + var(--hood-h) + 36px);
+  pointer-events:none;opacity:0;transition:opacity .6s;z-index:1;
+  background:
+    repeating-linear-gradient(100deg,transparent 0 46px,rgba(255,255,255,.13) 46px 48px) left top/24% 100% no-repeat,
+    repeating-linear-gradient(80deg,transparent 0 46px,rgba(255,255,255,.13) 46px 48px) right top/24% 100% no-repeat;
+  -webkit-mask:linear-gradient(90deg,#000,transparent 24%,transparent 76%,#000);
+          mask:linear-gradient(90deg,#000,transparent 24%,transparent 76%,#000);
+  animation:streak .45s linear infinite}
+@keyframes streak{to{background-position:left 0 top 48px,right 0 top 48px}}
+
+/* ---------- Jeepney cab ---------- */
+#roof{position:fixed;top:0;left:0;right:0;height:var(--roof-h);padding-top:env(safe-area-inset-top);z-index:5;
+  background:linear-gradient(#5b1010,#2a0707);box-shadow:0 5px 12px rgba(0,0,0,.55);
+  display:flex;align-items:center;justify-content:center}
+body.sk #roof{background:linear-gradient(#0f2a5b,#071633)}
+#roof::after{content:"";position:absolute;left:0;right:0;bottom:-11px;height:11px;
+  background:repeating-linear-gradient(90deg,var(--c1) 0 26px,var(--c2) 26px 52px,var(--c3) 52px 78px);
+  border-bottom:3px solid #cbd5e1;box-shadow:0 3px 6px rgba(0,0,0,.4)}
+#sign{background:linear-gradient(#fff,#f1f5f9);color:#b91c1c;font-weight:900;letter-spacing:.06em;
+  padding:4px 14px;border-radius:6px;border:2px solid #94a3b8;font-size:clamp(12px,3.6vw,20px);
+  box-shadow:0 0 0 3px rgba(0,0,0,.25),0 0 14px rgba(255,255,200,.35);white-space:nowrap;max-width:62vw;
+  overflow:hidden;text-overflow:ellipsis}
+body.sk #sign{color:#1d4ed8}
+.roofbtn{position:absolute;top:calc(env(safe-area-inset-top) + 6px);width:40px;height:40px;border-radius:10px;
+  background:rgba(255,255,255,.12);font-size:20px;display:grid;place-items:center}
+#menuBtn{left:8px}
+#lamp1,#lamp2{position:absolute;top:calc(env(safe-area-inset-top) + 18px);width:12px;height:12px;border-radius:50%;
+  background:radial-gradient(#fff7ad,#f59e0b);box-shadow:0 0 10px #fbbf24}
+#lamp1{left:calc(50% - 34vw)} #lamp2{right:calc(50% - 34vw)}
+
+#mirror{position:fixed;top:calc(var(--roof-h) + 10px);left:50%;transform:translateX(-50%);z-index:4;
+  width:clamp(80px,min(22vw,28vh),170px);pointer-events:none}
+#mirror .glass{height:clamp(20px,3.4vh,32px);border-radius:10px;border:4px solid #111;
+  background:linear-gradient(160deg,#94a3b8,#334155 40%,#64748b 60%,#1e293b);box-shadow:0 3px 8px rgba(0,0,0,.5)}
+#mirror .stem{position:absolute;left:50%;top:-12px;width:6px;height:13px;margin-left:-3px;background:#111}
+#rosary{display:block;width:36%;margin:-2px auto 0;transform-origin:50% 0;animation:sway 2.4s ease-in-out infinite}
+#rosary circle{fill:#7c2d12;stroke:#fde68a;stroke-width:.6}
+@keyframes sway{0%,100%{transform:rotate(calc(var(--sway,3deg) * -1))}50%{transform:rotate(var(--sway,3deg))}}
+
+#pillarL,#pillarR{position:fixed;top:var(--roof-h);bottom:calc(var(--dash-h) + var(--hood-h) + 60px);width:9px;z-index:4;
+  background:linear-gradient(90deg,#64748b,#f1f5f9,#64748b);pointer-events:none}
+#pillarL{left:0} #pillarR{right:0}
+
+#hood{position:fixed;left:0;right:0;bottom:var(--dash-h);height:var(--hood-h);z-index:5;pointer-events:none}
+#hood .body{position:absolute;inset:0;width:100%;height:100%}
+#horses{position:absolute;left:50%;bottom:calc(100% - 14px);width:clamp(70px,min(25vw,20vh),190px);transform:translateX(-50%)}
+.antenna{position:absolute;bottom:calc(100% - 6px);width:26px;height:clamp(60px,13vh,130px)}
+#antL{left:23%} #antR{right:23%}
+#hood.bump,#dash.bump{animation:bump .32s ease-out}
+@keyframes bump{30%{transform:translateY(2px)}}
+
+/* ---------- Dashboard ---------- */
+#dash{position:fixed;left:0;right:0;bottom:0;height:var(--dash-h);padding-bottom:env(safe-area-inset-bottom);z-index:6;
+  background:linear-gradient(#3b2a22,#1a1210 60%,#0d0907);border-top:3px solid #a8a29e;
+  display:grid;grid-template-columns:minmax(84px,1fr) auto minmax(84px,1fr);align-items:center;gap:4px;
+  padding-left:calc(6px + env(safe-area-inset-left));padding-right:calc(8px + env(safe-area-inset-right))}
+#dash .col{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;height:100%}
+#wheelBtn{width:clamp(86px,24vw,118px);aspect-ratio:1;border-radius:50%;padding:0;transition:transform .5s ease}
+#wheelBtn svg{width:100%;height:100%;display:block}
+#wheelBtn:active{filter:brightness(1.3)}
+.mid .row{display:flex;align-items:center;gap:6px}
+.blink{width:44px;height:46px;border-radius:12px;background:#27272a;border:2px solid #52525b;font-size:22px;color:#a1a1aa}
+.blink.on{color:#22c55e;border-color:#22c55e;animation:blinker .8s steps(1) infinite}
+.blink.pulse{border-color:#fbbf24;box-shadow:0 0 0 3px rgba(251,191,36,.35)}
+@keyframes blinker{50%{color:#14532d;background:#18181b}}
+#gauge{width:88px;height:52px;border-radius:12px;background:radial-gradient(#0f172a,#020617);border:2px solid #64748b;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:inset 0 0 12px #000}
+#spd{font-size:26px;font-weight:800;color:#a7f3d0;line-height:1;font-variant-numeric:tabular-nums}
+#gauge .u{font-size:10px;color:#94a3b8;letter-spacing:.1em}
+.mini{font-size:11px;color:#d6d3d1;display:flex;gap:10px;font-variant-numeric:tabular-nums}
+#gearLbl{color:#fbbf24;font-weight:800}
+.smallbtn{height:30px;padding:0 10px;border-radius:9px;background:#3f3f46;font-size:12px;font-weight:700;border:1px solid #71717a}
+#stopBtn{background:#7f1d1d;border-color:#ef4444}
+.right .pedal{width:100%;max-width:120px;height:48px;border-radius:12px;font-weight:900;font-size:18px;
+  display:flex;align-items:center;justify-content:center;gap:6px;border:2px solid}
+.pedal small{font-size:11px;letter-spacing:.08em}
+#gasBtn{background:linear-gradient(#166534,#14532d);border-color:#22c55e}
+#brakeBtn{background:linear-gradient(#7c2d12,#431407);border-color:#f97316}
+.pedal:active,.smallbtn:active,.blink:active{transform:scale(.95)}
+
+/* ---------- HUD ---------- */
+#hud{position:fixed;top:calc(var(--roof-h) + 16px);left:14px;z-index:7;display:flex;flex-direction:column;gap:6px;
+  max-width:calc(50vw - 70px)}
+#target{display:flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:rgba(0,0,0,.62);
+  backdrop-filter:blur(4px);font-size:12px;text-align:left;border:1px solid rgba(255,255,255,.18)}
+#tArrow{width:22px;height:22px;flex:none;transition:transform .5s}
+#tArrow path{fill:#38bdf8}
+#tText{display:flex;flex-direction:column;min-width:0}
+#tName{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:700}
+#tDist{color:#bae6fd}
+#chips{display:flex;flex-wrap:wrap;gap:4px}
+.chip{padding:3px 8px;border-radius:999px;background:rgba(0,0,0,.6);font-size:11px;border:1px solid rgba(255,255,255,.15);
+  font-variant-numeric:tabular-nums}
+
+#mapWrap{position:fixed;top:calc(var(--roof-h) + 16px);right:14px;width:104px;height:104px;border-radius:50%;
+  overflow:hidden;border:3px solid #cbd5e1;z-index:8;background:#e5e7eb;box-shadow:0 4px 14px rgba(0,0,0,.5)}
+#map{position:absolute;inset:0}
+#mapHit{position:absolute;inset:0;z-index:2}
+#mapLabel{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);font-size:10px;font-weight:800;
+  background:rgba(0,0,0,.6);padding:1px 6px;border-radius:6px;z-index:3;pointer-events:none}
+body.mapopen #mapWrap{top:0;left:0;right:0;bottom:calc(38vh + env(safe-area-inset-bottom) + 14px);width:auto;height:auto;border-radius:0;border:0;z-index:40}
+body.mapopen::before{content:"";position:fixed;inset:0;background:#0b1220;z-index:39}
+body.mapopen #mapHit,body.mapopen #mapLabel{display:none}
+#bigBar,#bigSheet{display:none}
+body.mapopen #bigBar{display:flex;position:fixed;top:calc(env(safe-area-inset-top) + 8px);left:8px;right:8px;gap:6px;z-index:41;flex-wrap:wrap}
+body.mapopen #bigSheet{display:block;position:fixed;left:8px;right:8px;bottom:calc(env(safe-area-inset-bottom) + 6px);z-index:41;
+  height:38vh;overflow:auto;background:rgba(15,23,42,.92);border-radius:14px;padding:10px 12px;font-size:13px;
+  border:1px solid #334155}
+.pill{padding:9px 12px;border-radius:999px;background:rgba(15,23,42,.9);border:1px solid #475569;font-weight:700;font-size:13px}
+.pill.on{background:#0369a1;border-color:#38bdf8}
+#jumpHint{position:fixed;top:calc(env(safe-area-inset-top) + 58px);left:50%;transform:translateX(-50%);z-index:41;
+  background:#0369a1;padding:6px 12px;border-radius:10px;font-size:12px;display:none;text-align:center}
+body.mapopen.jump #jumpHint{display:block}
+.goalrow{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid #1e293b}
+.goalrow .gi{font-size:20px} .goalrow .gn{flex:1} .goalrow .gd{color:#93c5fd;font-variant-numeric:tabular-nums}
+.goalrow.done .gn{color:#86efac}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:4px 12px;margin-bottom:6px;color:#cbd5e1}
+.stats b{color:#fff}
+
+#banner{position:fixed;left:50%;bottom:calc(var(--dash-h) + var(--hood-h) + 42px);transform:translate(-50%,20px);
+  z-index:9;opacity:0;pointer-events:none;transition:.25s;background:rgba(0,0,0,.78);padding:10px 16px;border-radius:14px;
+  font-size:15px;text-align:center;max-width:92vw;border:2px solid #fbbf24}
+#banner.show{opacity:1;transform:translate(-50%,0)}
+#banner.alert{border-color:#ef4444;animation:shake .5s}
+#banner.turn{border-color:#38bdf8}
+#banner .cd{color:#fbbf24;letter-spacing:2px;font-size:12px}
+@keyframes shake{25%{margin-left:-6px}75%{margin-left:6px}}
+#toast{position:fixed;left:50%;top:calc(var(--roof-h) + 128px);transform:translate(-50%,-10px);z-index:45;opacity:0;
+  transition:.3s;background:rgba(15,23,42,.92);padding:9px 14px;border-radius:12px;font-size:14px;pointer-events:none;
+  max-width:88vw;text-align:center;border:1px solid #334155}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+#celebrate{position:fixed;inset:0;z-index:50;pointer-events:none;display:none;align-items:center;justify-content:center;
+  flex-direction:column;text-align:center;background:radial-gradient(rgba(0,0,0,.55),transparent 70%)}
+#celebrate.show{display:flex}
+#celebrate .big{font-size:84px;animation:pop .6s}
+#celebrate .t{font-size:26px;font-weight:900;text-shadow:0 2px 8px #000}
+#celebrate .n{font-size:16px;color:#fde68a;text-shadow:0 2px 6px #000}
+@keyframes pop{0%{transform:scale(.2)}70%{transform:scale(1.2)}}
+.conf{position:fixed;top:-30px;font-size:22px;animation:fall linear forwards;z-index:51;pointer-events:none}
+@keyframes fall{to{transform:translateY(110vh) rotate(540deg)}}
+
+/* ---------- Overlays (setup / menu / errors) ---------- */
+.overlay{position:fixed;inset:0;z-index:60;overflow:auto;-webkit-overflow-scrolling:touch;user-select:text;-webkit-user-select:text;
+  background:radial-gradient(circle at 50% 0,#3b0d0d,#0b0b0f 70%);padding:calc(env(safe-area-inset-top) + 16px) 16px calc(env(safe-area-inset-bottom) + 24px)}
+body.sk .overlay{background:radial-gradient(circle at 50% 0,#0f2a5b,#0b0b0f 70%)}
+.wrapC{max-width:560px;margin:0 auto}
+.logo{text-align:center;margin:6px 0 14px}
+.logo h1{margin:0;font-size:30px;font-weight:900;letter-spacing:.02em}
+.logo .stripe{height:8px;border-radius:4px;margin:8px auto 0;width:180px;
+  background:repeating-linear-gradient(90deg,var(--c1) 0 20px,var(--c2) 20px 40px,var(--c3) 40px 60px)}
+.logo p{margin:8px 0 0;color:#cbd5e1;font-size:14px}
+.card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:14px;margin:12px 0}
+.card h2{margin:0 0 8px;font-size:16px}
+.card p,.card li{font-size:14px;line-height:1.45;color:#e2e8f0}
+.card ol{padding-left:20px;margin:6px 0}
+.card code{background:#0f172a;padding:1px 5px;border-radius:5px;font-size:12.5px;word-break:break-all;color:#fde68a}
+input[type=password],input[type=text]{width:100%;padding:12px;border-radius:10px;border:1px solid #475569;background:#0f172a;color:#fff;font-size:15px}
+.keyrow{display:flex;gap:6px}
+.keyrow button{padding:0 12px;border-radius:10px;background:#334155;font-size:13px}
+details summary{cursor:pointer;font-weight:700;color:#7dd3fc;margin-top:10px}
+.locs{display:grid;gap:8px}
+.loc{display:flex;gap:12px;align-items:center;text-align:left;padding:12px;border-radius:14px;background:rgba(0,0,0,.3);border:2px solid #334155;width:100%}
+.loc .f{font-size:30px}
+.loc b{display:block;font-size:16px}
+.loc span{font-size:12.5px;color:#cbd5e1}
+.loc.sel{border-color:#fbbf24;background:rgba(251,191,36,.12)}
+.opt{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:14px}
+.opt input{width:22px;height:22px;accent-color:#f59e0b}
+.big-btn{width:100%;padding:16px;border-radius:16px;font-size:19px;font-weight:900;margin-top:8px;
+  background:linear-gradient(#f59e0b,#d97706);color:#1c1917;box-shadow:0 6px 18px rgba(217,119,6,.35)}
+.big-btn:disabled{opacity:.6}
+.err{color:#fca5a5;font-size:14px;margin-top:8px;white-space:pre-line}
+.note{font-size:12.5px;color:#94a3b8;line-height:1.45}
+.menu-actions{display:grid;gap:8px}
+.menu-actions button{padding:12px;border-radius:12px;background:#1e293b;border:1px solid #334155;text-align:left;font-size:15px}
+kbd{background:#1e293b;border:1px solid #475569;border-radius:5px;padding:0 5px;font-size:12px}
+
+@media (orientation:landscape) and (max-height:520px){
+  :root{--dash-h:calc(96px + env(safe-area-inset-bottom));--hood-h:clamp(40px,9vh,70px);--roof-h:calc(42px + env(safe-area-inset-top))}
+  #wheelBtn{width:80px} .right .pedal{height:38px} #gauge{height:44px} #spd{font-size:22px} .smallbtn{height:26px}
+  #dash .col{gap:3px}
+}
+</style>
+</head>
+<body class="ph">
+
+<div id="sv"></div>
+<div id="speedfx"></div>
+
+<!-- Cab overlay -->
+<div id="roof">
+  <button id="menuBtn" class="roofbtn" aria-label="Menu">☰</button>
+  <span id="lamp1"></span><div id="sign">URDANETA ⇄ DAGUPAN</div><span id="lamp2"></span>
+</div>
+<div id="pillarL"></div><div id="pillarR"></div>
+<div id="mirror">
+  <div class="stem"></div><div class="glass"></div>
+  <svg id="rosary" viewBox="0 0 60 112"><g id="beads"></g>
+    <line x1="30" y1="76" x2="30" y2="92" stroke="#fde68a" stroke-width="1"/>
+    <path d="M28.5 92h3v6h4v3h-4v9h-3v-9h-4v-3h4z" fill="#fde68a"/></svg>
+</div>
+
+<div id="hood">
+  <svg class="body" viewBox="0 0 1000 200" preserveAspectRatio="none">
+    <defs>
+      <linearGradient id="hoodG" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0" stop-color="#f1f5f9"/><stop offset=".45" stop-color="#94a3b8"/><stop offset="1" stop-color="#334155"/>
+      </linearGradient>
+    </defs>
+    <rect width="1000" height="200" fill="url(#hoodG)"/>
+    <path d="M0 62 Q500 14 1000 62" style="stroke:var(--c1)" stroke-width="20" fill="none"/>
+    <path d="M0 96 Q500 48 1000 96" style="stroke:var(--c2)" stroke-width="11" fill="none"/>
+    <path d="M0 122 Q500 74 1000 122" style="stroke:var(--c3)" stroke-width="9" fill="none"/>
+    <path d="M500 0V200" stroke="rgba(255,255,255,.45)" stroke-width="7"/>
+    <rect width="1000" height="7" fill="#0b0b0f"/>
+  </svg>
+  <svg id="horses" viewBox="0 0 260 126">
+    <defs>
+      <linearGradient id="chromeG" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0" stop-color="#ffffff"/><stop offset=".35" stop-color="#94a3b8"/>
+        <stop offset=".55" stop-color="#f8fafc"/><stop offset="1" stop-color="#475569"/>
+      </linearGradient>
+      <g id="knight">
+        <path d="M22 118H84L80 104C86 86 88 62 80 42 74 26 62 14 50 10L52 1 44 8 40 0 36 10C24 16 14 28 8 42L4 52C2 58 6 63 12 62L22 58C28 57 32 60 30 66 26 78 18 90 22 104Z"
+              fill="url(#chromeG)" stroke="#334155" stroke-width="2"/>
+        <circle cx="34" cy="30" r="3.2" fill="#1e293b"/>
+        <path d="M62 18C72 30 78 50 76 70M56 24C64 38 68 56 66 76" stroke="#64748b" stroke-width="2" fill="none"/>
+      </g>
+    </defs>
+    <use href="#knight" x="12" y="0"/>
+    <use href="#knight" transform="translate(248 0) scale(-1 1)"/>
+    <rect x="10" y="116" width="240" height="10" rx="4" fill="url(#chromeG)" stroke="#334155"/>
+  </svg>
+  <svg id="antL" class="antenna" viewBox="0 0 26 130" preserveAspectRatio="none">
+    <line x1="4" y1="130" x2="4" y2="6" stroke="#e2e8f0" stroke-width="2.5"/>
+    <circle cx="4" cy="5" r="3.5" fill="#fbbf24"/>
+    <path d="M5 12L25 18 5 26Z" style="fill:var(--c1)"/>
+  </svg>
+  <svg id="antR" class="antenna" viewBox="0 0 26 130" preserveAspectRatio="none">
+    <line x1="22" y1="130" x2="22" y2="6" stroke="#e2e8f0" stroke-width="2.5"/>
+    <circle cx="22" cy="5" r="3.5" fill="#fbbf24"/>
+    <path d="M21 12L1 18 21 26Z" style="fill:var(--c3)"/>
+  </svg>
+</div>
+
+<div id="dash">
+  <div class="col left">
+    <button id="wheelBtn" aria-label="Horn">
+      <svg viewBox="0 0 120 120">
+        <circle cx="60" cy="60" r="50" fill="none" stroke="#1c1412" stroke-width="13"/>
+        <circle cx="60" cy="60" r="50" fill="none" stroke="#57534e" stroke-width="2"/>
+        <path d="M60 60L60 110M60 60L16 38M60 60L104 38" stroke="#1c1412" stroke-width="11" stroke-linecap="round"/>
+        <circle cx="60" cy="60" r="20" fill="url(#chromeG)" stroke="#1c1412" stroke-width="3"/>
+        <text x="60" y="64" text-anchor="middle" font-size="10" font-weight="900" fill="#7f1d1d">BEEP</text>
+      </svg>
+    </button>
+  </div>
+  <div class="col mid">
+    <div class="row">
+      <button id="blL" class="blink" aria-label="Turn left">◀</button>
+      <div id="gauge"><div id="spd">0</div><div class="u">KM/H</div></div>
+      <button id="blR" class="blink" aria-label="Turn right">▶</button>
+    </div>
+    <div class="mini"><span>Gear <span id="gearLbl">N</span></span><span id="odoLbl">0.0 km</span></div>
+    <div class="row"><button id="stopBtn" class="smallbtn">■ STOP</button><button id="uturnBtn" class="smallbtn">↶ U-turn</button></div>
+  </div>
+  <div class="col right">
+    <button id="gasBtn" class="pedal">▲ <small>GAS</small></button>
+    <button id="brakeBtn" class="pedal">▼ <small>BRAKE</small></button>
+  </div>
+</div>
+
+<div id="hud">
+  <button id="target" aria-label="Next goal">
+    <svg id="tArrow" viewBox="0 0 24 24"><path d="M12 2L20 21 12 16 4 21Z"/></svg>
+    <span id="tText"><span id="tName">—</span><span id="tDist"></span></span>
+  </button>
+  <div id="chips">
+    <span class="chip" id="chipGoals">🌊 0/5</span>
+    <span class="chip" id="chipRiders">👥 0</span>
+    <span class="chip" id="chipMoney">₱0</span>
+    <span class="chip" id="chipNew">🆕 0.0 km</span>
+  </div>
+</div>
+
+<div id="mapWrap"><div id="map"></div><button id="mapHit" aria-label="Open map"></button><span id="mapLabel">MAP</span></div>
+<div id="bigBar">
+  <button class="pill" id="closeMap">✕ Back to driving</button>
+  <button class="pill" id="jumpBtn">📍 Jump to a road</button>
+  <button class="pill" id="meBtn">⌖ Me</button>
+</div>
+<div id="jumpHint">Tap any <b>blue</b> road to drop the jeepney there</div>
+<div id="bigSheet"></div>
+
+<div id="banner"></div>
+<div id="toast"></div>
+<div id="celebrate"></div>
+
+<!-- ============ SETUP ============ -->
+<div id="setup" class="overlay">
+ <div class="wrapC">
+  <div class="logo"><h1>JEEPNEY RIDE</h1><div class="stripe"></div>
+    <p>Drive a jeepney through real Street View. Find every road to the sea, pick up passengers, collect fares.</p></div>
+
+  <div class="card">
+    <h2>1 · Google Maps API key</h2>
+    <div class="keyrow"><input id="keyInput" type="password" placeholder="Paste your API key (AIza…)" autocomplete="off" spellcheck="false">
+      <button id="keyShow" type="button">Show</button></div>
+    <p class="note">Your key is saved only in this browser.</p>
+    <details id="keyHelp">
+      <summary>How to get a key (about 5 minutes, free tier)</summary>
+      <ol>
+        <li>Open <a href="https://console.cloud.google.com/" target="_blank" rel="noopener" style="color:#7dd3fc">console.cloud.google.com</a> and create a project (e.g. “Jeepney”).</li>
+        <li><b>Billing</b> → link a billing account (a card is required). Google includes free monthly usage per API, and this game uses <b>one Street View session each time you press Start</b>.</li>
+        <li><b>APIs &amp; Services → Library</b> → enable <b>Maps JavaScript API</b>.</li>
+        <li><b>APIs &amp; Services → Credentials → Create credentials → API key</b>. Copy it here.</li>
+        <li>Edit the key → <b>Application restrictions: Websites</b> → add <code id="originHint">https://your-site.example/*</code><br>
+            <b>API restrictions</b> → Maps JavaScript API → Save.</li>
+        <li>Optional safety net: <b>Billing → Budgets &amp; alerts</b> → set a small budget alert, and/or lower the daily limits in the API's <b>Quotas</b> page.</li>
+      </ol>
+      <p id="fileWarn" class="err" hidden>You opened this file directly from disk. Google's “Websites” restriction can't match local files — upload this file to a website (any HTTPS hosting) and open it from there.</p>
+    </details>
+  </div>
+
+  <div class="card">
+    <h2>2 · Where do you drive?</h2>
+    <div class="locs" id="setupLocs"></div>
+  </div>
+
+  <div class="card">
+    <h2>3 · Options</h2>
+    <label class="opt"><input type="checkbox" id="optPass" checked> Pasahero mode – passengers wave, you stop, they pay</label>
+    <label class="opt"><input type="checkbox" id="optSound" checked> Sound (diesel engine, horn, voices)</label>
+    <label class="opt"><input type="checkbox" id="optZoom" checked> Motion effect (camera pushes forward between photos)</label>
+  </div>
+
+  <button id="startBtn" class="big-btn">START ENGINE</button>
+  <div id="setupErr" class="err"></div>
+
+  <div class="card">
+    <h2>Controls</h2>
+    <p><b>▲ GAS / ▼ BRAKE</b> change gear (N, 1–4). <b>■ STOP</b> stops for passengers.<br>
+       <b>◀ ▶</b> are the turn signals: switch one on and the jeepney turns at the next junction on that side.<br>
+       <b>↶</b> U-turn · tap the <b>steering wheel</b> to honk · drag the street view to look around · tap the round <b>map</b> to open the big map and jump to any blue road.</p>
+    <p class="note">Keyboard: <kbd>↑</kbd>/<kbd>↓</kbd> gear · <kbd>←</kbd>/<kbd>→</kbd> signals · <kbd>Space</kbd> horn · <kbd>S</kbd> stop · <kbd>U</kbd> U-turn · <kbd>M</kbd> map</p>
+  </div>
+  <p class="note" style="text-align:center">Street View imagery and map data © Google. Photos are taken every ~10 m, so the ride moves in short hops.</p>
+ </div>
+</div>
+
+<!-- ============ MENU ============ -->
+<div id="menu" class="overlay" hidden>
+ <div class="wrapC">
+  <div class="logo"><h1>PAUSED</h1><div class="stripe"></div></div>
+  <div class="card"><h2>Location</h2><div class="locs" id="menuLocs"></div></div>
+  <div class="card">
+    <label class="opt"><input type="checkbox" id="mPass"> Pasahero mode</label>
+    <label class="opt"><input type="checkbox" id="mSound"> Sound</label>
+    <label class="opt"><input type="checkbox" id="mZoom"> Motion effect</label>
+  </div>
+  <div class="menu-actions">
+    <button id="resumeBtn" style="background:#b45309;border-color:#f59e0b;font-weight:800">▶ Resume driving</button>
+    <button id="fsBtn">⛶ Fullscreen</button>
+    <button id="homeBtn">🏁 Back to the start point</button>
+    <button id="resetBtn">🗑 Reset progress for this location</button>
+    <button id="keyBtn">🔑 Change API key</button>
+  </div>
+  <p class="note" style="margin-top:14px">Tip: switching location inside the game reuses the same Street View session, so it doesn't count as a new one.</p>
+ </div>
+</div>
+
+<!-- ============ AUTH ERROR ============ -->
+<div id="authErr" class="overlay" hidden>
+ <div class="wrapC">
+  <div class="logo"><h1>Google said no 😕</h1><div class="stripe"></div></div>
+  <div class="card">
+    <p>Google Maps rejected the API key. Usually one of these:</p>
+    <ol>
+      <li><b>Maps JavaScript API</b> isn't enabled in your project.</li>
+      <li><b>Billing</b> isn't linked to the project.</li>
+      <li>The key's <b>Websites</b> restriction doesn't include <code id="originHint2"></code></li>
+      <li>The key was just created — it can take a few minutes to start working.</li>
+    </ol>
+    <p class="note">Details are in your browser's developer console.</p>
+  </div>
+  <button id="authRetry" class="big-btn">Enter another key</button>
+ </div>
+</div>
+
+<script>
+'use strict';
+/* =====================================================================
+   Jeepney Ride – Google Street View driving game (single file)
+   ===================================================================== */
+const $ = s => document.querySelector(s);
+
+/* ---------- storage ---------- */
+const store = {
+  get(k, d){ try{ const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} },
+  del(k){ try{ localStorage.removeItem(k); }catch(e){} }
+};
+
+/* ---------- geo helpers ---------- */
+const RE = 6371000, rad = d => d*Math.PI/180, deg = r => r*180/Math.PI;
+const norm = h => ((h % 360) + 360) % 360;
+function angDiff(a, b){ let d = norm(a) - norm(b); if (d > 180) d -= 360; if (d <= -180) d += 360; return d; }
+function dist(a, b){
+  const dLat = rad(b.lat - a.lat), dLng = rad(b.lng - a.lng);
+  const s = Math.sin(dLat/2)**2 + Math.cos(rad(a.lat))*Math.cos(rad(b.lat))*Math.sin(dLng/2)**2;
+  return 2*RE*Math.asin(Math.sqrt(s));
+}
+function bearing(a, b){
+  const y = Math.sin(rad(b.lng - a.lng))*Math.cos(rad(b.lat));
+  const x = Math.cos(rad(a.lat))*Math.sin(rad(b.lat)) - Math.sin(rad(a.lat))*Math.cos(rad(b.lat))*Math.cos(rad(b.lng - a.lng));
+  return norm(deg(Math.atan2(y, x)));
+}
+const cellKey = p => Math.round(p.lat*4000) + ':' + Math.round(p.lng*4000);   // ~25 m grid
+const fmtKm = m => (m >= 10 ? m.toFixed(0) : m.toFixed(1)) + ' km';
+
+/* ---------- locations ---------- */
+const LOCS = {
+  pangasinan: {
+    id:'pangasinan', cls:'ph', flag:'🇵🇭', name:'Pangasinan · Urdaneta',
+    sub:'Start in Urdaneta City and find the roads to Lingayen Gulf',
+    start:{lat:15.9761, lng:120.5711}, startLabel:'Urdaneta City',
+    sign:'URDANETA ⇄ DAGUPAN', cur:'₱', dec:0, lang:'fil-PH', icon:'🌊',
+    fare: km => 13 + Math.max(0, km - 4)*1.8,
+    ph:{ greet:'Tara na! Sakay na!', hail:'Sakay!', board:'Bayad po!', stop:'Para po!',
+         missed:'Lampas na po!', choose:'Kaliwa o kanan?', thanks:'Salamat po!', reach:'Nakarating sa dagat!', noLeft:'Walang kaliwa dito', noRight:'Walang kanan dito' },
+    goals:[
+      {id:'bolasi',     icon:'🌊', name:'Bolasi Beach · San Fabian',    lat:16.1534, lng:120.4175, r:550},
+      {id:'tondaligan', icon:'🌊', name:'Tondaligan Beach · Dagupan',   lat:16.0915, lng:120.3504, r:550},
+      {id:'binmaley',   icon:'🌊', name:'Binmaley Beach',               lat:16.0453, lng:120.2699, r:550},
+      {id:'lingayen',   icon:'🌊', name:'Lingayen Beach · Capitol',     lat:16.0360, lng:120.2316, r:600},
+      {id:'lucap',      icon:'🏝️', name:'Lucap Wharf · Hundred Islands', lat:16.1870, lng:120.0150, r:1200, reach:'Hundred Islands!'}
+    ]
+  },
+  iza: {
+    id:'iza', cls:'sk', flag:'🇸🇰', name:'Slovensko · Iža',
+    sub:'Danube village near Komárno – Roman fort and the town',
+    start:{lat:47.7495, lng:18.2335}, startLabel:'Iža',
+    sign:'IŽA ⇄ KOMÁRNO', cur:'€', dec:2, lang:'sk-SK', icon:'🏛️',
+    fare: km => 0.9 + km*0.12,
+    ph:{ greet:'Nastupovať, ideme!', hail:'Pasažier máva!', board:'Dobrý deň!', stop:'Zastavte, prosím!',
+         missed:'Prešli ste zastávku!', choose:'Vľavo alebo vpravo?', thanks:'Ďakujem!', reach:'Dorazil si!', noLeft:'Vľavo sa nedá', noRight:'Vpravo sa nedá' },
+    goals:[
+      {id:'kelemantia', icon:'🏛️', name:'Kelemantia · Roman fort on the Danube', lat:47.7448, lng:18.1990, r:350},
+      {id:'komarno',    icon:'🏙️', name:'Komárno · town centre',               lat:47.7619, lng:18.1284, r:600}
+    ]
+  }
+};
+const LOC = () => LOCS[S.settings.loc] || LOCS.pangasinan;
+const money = v => { const L = LOC(); return L.cur + v.toFixed(L.dec); };
+
+/* ---------- state ---------- */
+const GEAR_MS = [0, 1500, 950, 620, 400];
+const S = {
+  key: store.get('jeep.key', ''),
+  settings: Object.assign({loc:'pangasinan', passengers:true, sound:true, zoomFx:true}, store.get('jeep.settings', {})),
+  started:false, menuOpen:false,
+  gear:0, blinker:null, blinkHops:0, busy:false, waitingTurn:null,
+  travelHeading:0, lookOffset:0, userLooking:false,
+  pos:null, lastArriveT:0, speedKmh:0, hopCount:0, baseZoom:1, curZoom:1, lastFx:0,
+  prog:null, trail:[], cells:new Set(), recentCells:[], hail:null, riders:[], targetId:null
+};
+if (!LOCS[S.settings.loc]) S.settings.loc = 'pangasinan';
+const paused = () => S.menuOpen || bigOpen || document.hidden || !S.started;
+
+/* ---------- small UI helpers ---------- */
+let toastT;
+function toast(html, ms = 2600){
+  const t = $('#toast'); t.innerHTML = html; t.classList.add('show');
+  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), ms);
+}
+(function buildRosary(){
+  let s = '';
+  for (let i = 0; i <= 18; i++){ const t = i/18; s += `<circle cx="${(8 + 44*t).toFixed(1)}" cy="${(4 + 72*Math.sin(Math.PI*t)).toFixed(1)}" r="2.7"/>`; }
+  $('#beads').innerHTML = s;
+})();
+
+/* ---------- audio ---------- */
+const A = {ctx:null, eng:null};
+function audioInit(){
+  if (A.ctx) { if (A.ctx.state === 'suspended') A.ctx.resume(); return; }
+  try{
+    const C = window.AudioContext || window.webkitAudioContext; A.ctx = new C();
+    const o = A.ctx.createOscillator(); o.type = 'sawtooth'; o.frequency.value = 38;
+    const o2 = A.ctx.createOscillator(); o2.type = 'square'; o2.frequency.value = 19;
+    const lfo = A.ctx.createOscillator(); lfo.frequency.value = 9;
+    const lg = A.ctx.createGain(); lg.gain.value = 5; lfo.connect(lg); lg.connect(o.frequency);
+    const f = A.ctx.createBiquadFilter(); f.type = 'lowpass'; f.frequency.value = 240;
+    const g = A.ctx.createGain(); g.gain.value = 0;
+    const g2 = A.ctx.createGain(); g2.gain.value = .35;
+    o.connect(f); o2.connect(g2); g2.connect(f); f.connect(g); g.connect(A.ctx.destination);
+    o.start(); o2.start(); lfo.start();
+    A.eng = {o, o2, g, lfo};
+  }catch(e){}
+}
+function engineUpdate(){
+  if (!A.eng) return;
+  const on = S.settings.sound && !paused(), t = A.ctx.currentTime;
+  A.eng.g.gain.setTargetAtTime(on ? 0.05 + 0.018*S.gear : 0, t, .25);
+  A.eng.o.frequency.setTargetAtTime(34 + S.gear*12, t, .5);
+  A.eng.o2.frequency.setTargetAtTime(17 + S.gear*6, t, .5);
+  A.eng.lfo.frequency.setTargetAtTime(8 + S.gear*3.5, t, .5);
+}
+function tone(freqs, dur, type = 'square', vol = .1, delay = 0){
+  if (!A.ctx || !S.settings.sound) return;
+  const t = A.ctx.currentTime + delay;
+  for (const fr of freqs){
+    const o = A.ctx.createOscillator(); o.type = type; o.frequency.value = fr;
+    const g = A.ctx.createGain(); g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+    o.connect(g); g.connect(A.ctx.destination); o.start(t); o.stop(t + dur + .03);
+  }
+}
+const sfx = {
+  horn(){ tone([392, 494], .22, 'square', .07); tone([392, 494], .38, 'square', .07, .28); },
+  coin(){ tone([988], .09, 'sine', .15); tone([1319], .3, 'sine', .15, .09); },
+  tick(){ tone([1900], .02, 'square', .03); },
+  ding(){ tone([880], .5, 'triangle', .12); },
+  fanfare(){ [523, 659, 784, 1047].forEach((f, i) => tone([f], .35, 'triangle', .12, i*.13)); },
+  bump(){ tone([70], .08, 'sine', .08); }
+};
+function say(text){
+  if (!S.settings.sound || !('speechSynthesis' in window)) return;
+  try{
+    const L = LOC(), u = new SpeechSynthesisUtterance(text); u.lang = L.lang; u.rate = 1.05;
+    const v = speechSynthesis.getVoices().find(v => v.lang && v.lang.toLowerCase().startsWith(L.lang.slice(0, 2)));
+    if (v) u.voice = v;
+    speechSynthesis.cancel(); speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+/* ---------- progress ---------- */
+function loadProgress(loc){
+  S.prog = Object.assign({odo:0, newKm:0, goals:{}, money:0, delivered:0, missed:0}, store.get('jeep.prog.' + loc, {}));
+  S.trail = store.get('jeep.trail.' + loc, []);
+  S.cells = new Set(store.get('jeep.cells.' + loc, []));
+  S.trail.push([]);
+  S.riders = []; S.hail = null; S.targetId = null; S.pos = null; S.recentCells = [];
+}
+let saveT;
+function saveSoon(){ clearTimeout(saveT); saveT = setTimeout(saveNow, 1200); }
+function saveNow(){
+  if (!S.prog) return;
+  const loc = S.settings.loc;
+  let total = S.trail.reduce((n, s) => n + s.length, 0);
+  while (total > 40000 && S.trail.length > 1){ total -= S.trail[0].length; S.trail.shift(); }
+  store.set('jeep.prog.' + loc, S.prog);
+  store.set('jeep.trail.' + loc, S.trail.filter(s => s.length > 1));
+  const cells = [...S.cells]; store.set('jeep.cells.' + loc, cells.length > 80000 ? cells.slice(-80000) : cells);
+}
+
+/* =====================================================================
+   Google Maps
+   ===================================================================== */
+let G = {}, pano = null, svs = null, map = null, coverage = null, playerMk = null, curLine = null;
+let trailLines = [], goalMks = [], bigOpen = false, jumpMode = false, authFailed = false;
+
+function loadMaps(key){
+  return new Promise((resolve, reject) => {
+    if (window.google && google.maps && google.maps.importLibrary) return resolve();
+    window.__jeepInit = () => resolve();
+    window.gm_authFailure = () => { authFailed = true; showAuthError(); };
+    const s = document.createElement('script');
+    s.src = 'https://maps.googleapis.com/maps/api/js?key=' + encodeURIComponent(key) + '&v=weekly&loading=async&callback=__jeepInit';
+    s.async = true;
+    s.onerror = () => reject(new Error('Could not load Google Maps. Check your internet connection.'));
+    document.head.appendChild(s);
+  });
+}
+
+async function initGoogle(){
+  const sv = await google.maps.importLibrary('streetView');
+  const mp = await google.maps.importLibrary('maps');
+  let mk = {}; try{ mk = await google.maps.importLibrary('marker'); }catch(e){}
+  try{ await google.maps.importLibrary('core'); }catch(e){}
+  G = { StreetViewPanorama: sv.StreetViewPanorama, StreetViewService: sv.StreetViewService,
+        StreetViewCoverageLayer: sv.StreetViewCoverageLayer, Map: mp.Map, Polyline: mp.Polyline,
+        Circle: mp.Circle, Marker: mk.Marker || google.maps.Marker || null };
+
+  svs = new G.StreetViewService();
+  pano = new G.StreetViewPanorama($('#sv'), {
+    disableDefaultUI:true, clickToGo:false, linksControl:false, panControl:false, zoomControl:false,
+    addressControl:false, fullscreenControl:false, motionTracking:false, motionTrackingControl:false,
+    enableCloseButton:false, scrollwheel:false, disableDoubleClickZoom:true, showRoadLabels:true, visible:true
+  });
+  const start = LOC().start;
+  map = new G.Map($('#map'), {
+    center:start, zoom:16, disableDefaultUI:true, gestureHandling:'none', keyboardShortcuts:false,
+    clickableIcons:false, streetViewControl:false
+  });
+  coverage = new G.StreetViewCoverageLayer(); coverage.setMap(map);
+  map.addListener('click', e => { if (bigOpen && jumpMode && e.latLng) jumpFromMap(e.latLng.toJSON()); });
+
+  // looking around by dragging
+  const markLook = () => { S.userLooking = true; clearTimeout(markLook.t); };
+  const endLook = () => { clearTimeout(markLook.t); markLook.t = setTimeout(() => S.userLooking = false, 1400); };
+  const svEl = $('#sv');
+  svEl.addEventListener('pointerdown', markLook, true); svEl.addEventListener('touchstart', markLook, {capture:true, passive:true});
+  svEl.addEventListener('pointerup', endLook, true); svEl.addEventListener('pointercancel', endLook, true);
+  svEl.addEventListener('touchend', endLook, {capture:true, passive:true});
+
+  computeBaseZoom();
+  requestAnimationFrame(fxLoop);
+}
+
+function isAuthError(e){
+  return authFailed || (e && (e.code === 'REQUEST_DENIED' || /denied|not authorized|api key|billing/i.test(String(e.message || ''))));
+}
+
+async function findPano(loc, radii = [60, 250, 1000, 5000]){
+  let fallback = null;   // a panorama without road links (e.g. a user 360° photo) – only if nothing better exists
+  for (const r of radii){
+    try{
+      const req = { location:loc, radius:r, preference: google.maps.StreetViewPreference ? google.maps.StreetViewPreference.NEAREST : 'nearest' };
+      const Src = google.maps.StreetViewSource;
+      if (Src && Src.GOOGLE) req.sources = [Src.GOOGLE]; else if (Src) req.source = Src.OUTDOOR;
+      const res = await svs.getPanorama(req);
+      const data = res && (res.data || res);
+      if (data && data.location && data.location.pano){
+        if (data.links && data.links.length) return data;
+        fallback = fallback || data;
+      }
+    }catch(e){
+      if (isAuthError(e)) throw new Error('AUTH');
+    }
+  }
+  return fallback;
+}
+
+function setPanoAndWait(id){
+  return new Promise(resolve => {
+    let done = false, l = null, l2 = null, t = null;
+    const finish = () => {
+      if (done) return; done = true; clearTimeout(t);
+      if (l) google.maps.event.removeListener(l); if (l2) google.maps.event.removeListener(l2); resolve();
+    };
+    l = pano.addListener('links_changed', () => { if (pano.getPano() === id) finish(); });
+    // fallback in case links_changed doesn't fire (identical links): status OK → give links a moment, then go on
+    l2 = pano.addListener('status_changed', () => { if (pano.getPano() === id) setTimeout(finish, 250); });
+    t = setTimeout(finish, 3500);
+    pano.setPano(id);
+    applyPov();
+  });
+}
+
+function applyPov(){
+  if (!pano) return;
+  pano.setPov({heading: norm(S.travelHeading + S.lookOffset), pitch: 0});
+}
+
+function computeBaseZoom(){
+  S.baseZoom = innerHeight > innerWidth ? 0.55 : 1.0;
+  S.curZoom = -1;
+}
+
+/* ---------- jumping / teleport ---------- */
+async function jumpTo(ll){
+  S.busy = true;
+  try{
+    const data = await findPano(ll);
+    if (!data) return false;
+    if (!S.trail.length || S.trail[S.trail.length - 1].length){ S.trail.push([]); newCurLine(); }
+    else if (!curLine) newCurLine();
+    const ch = data.tiles && typeof data.tiles.centerHeading === 'number' ? data.tiles.centerHeading : null;
+    if (ch != null) S.travelHeading = ch;
+    else if (data.links && data.links.length) S.travelHeading = data.links[0].heading;
+    S.lookOffset = 0; S.waitingTurn = null; S.blinker = null; S.pos = null; S.speedKmh = 0;
+    await setPanoAndWait(data.location.pano);
+    // face along the road: snap to the link closest to the camera heading
+    const links = (pano.getLinks() || []).filter(l => l && typeof l.heading === 'number');
+    if (links.length){
+      const best = links.reduce((a, b) => Math.abs(angDiff(a.heading, S.travelHeading)) <= Math.abs(angDiff(b.heading, S.travelHeading)) ? a : b);
+      S.travelHeading = best.heading; applyPov();
+    }
+    onArrive();
+    return true;
+  } finally { S.busy = false; }
+}
+async function jumpFromMap(ll){
+  toast('Looking for Street View there…', 1500);
+  const ok = await jumpTo(ll).catch(e => { if (e.message === 'AUTH') showAuthError(); return false; });
+  if (!ok){ toast('No Street View there – tap a <b>blue</b> road'); return; }
+  setGear(0); closeMap(); toast('📍 Jeepney moved. Shift into gear ▲');
+}
+
+/* ---------- driving ---------- */
+function chooseLink(links){
+  const opts = links.filter(l => l && l.pano && typeof l.heading === 'number')
+                    .map(l => ({pano:l.pano, heading:l.heading, d:angDiff(l.heading, S.travelHeading)}));
+  if (!opts.length) return {need:'dead'};
+  const by = f => (a, b) => f(a) - f(b);
+  if (S.blinker === 'L'){
+    const c = opts.filter(o => o.d <= -22 && o.d >= -165).sort(by(o => Math.abs(o.d + 90)))[0];
+    if (c) return {link:c, turned:true};
+  }
+  if (S.blinker === 'R'){
+    const c = opts.filter(o => o.d >= 22 && o.d <= 165).sort(by(o => Math.abs(o.d - 90)))[0];
+    if (c) return {link:c, turned:true};
+  }
+  const fwd = opts.filter(o => Math.abs(o.d) <= 55).sort(by(o => Math.abs(o.d)))[0];
+  if (fwd) return {link:fwd};
+  const nb = opts.filter(o => Math.abs(o.d) < 140);
+  if (nb.length === 1) return {link:nb[0]};          // the road simply bends
+  return {need: nb.length ? 'choose' : 'dead'};
+}
+
+async function hop(){
+  const res = chooseLink(pano.getLinks() || []);
+  if (!res.link){
+    if (S.waitingTurn !== res.need){
+      S.waitingTurn = res.need; sfx.ding();
+      if (res.need === 'choose') { pulseBlinkers(true); say(LOC().ph.choose); }
+      updateBanner();
+    }
+    return false;
+  }
+  if (S.waitingTurn){ S.waitingTurn = null; pulseBlinkers(false); updateBanner(); }
+  const prev = S.travelHeading;
+  const povH = pano.getPov().heading;
+  const off = angDiff(povH, prev);
+  S.lookOffset = S.userLooking ? off : (Math.abs(off) < 6 ? 0 : off*0.45);
+  const turn = angDiff(res.link.heading, prev);
+  S.travelHeading = res.link.heading;
+  if (res.turned){ setBlinker(null); }
+  else if (S.blinker && ++S.blinkHops > 45) setBlinker(null);
+  if (Math.abs(turn) > 20) turnWheel(turn);
+  S.busy = true;
+  try{ await setPanoAndWait(res.link.pano); } finally { S.busy = false; }
+  onArrive();
+  return true;
+}
+
+let loopT = null;
+function schedule(ms){ clearTimeout(loopT); loopT = setTimeout(loop, ms); }
+async function loop(){
+  if (paused() || S.gear === 0 || S.busy || !pano){ schedule(180); return; }
+  const t0 = performance.now();
+  try{ await hop(); }catch(e){ console.warn(e); }
+  schedule(Math.max(30, GEAR_MS[S.gear] - (performance.now() - t0)));
+}
+
+function onArrive(){
+  const p = pano.getPosition(); if (!p) return;
+  const pos = {lat:p.lat(), lng:p.lng()}, now = performance.now();
+  const ck = cellKey(pos);
+  if (S.pos){
+    const d = dist(S.pos, pos);
+    if (d < 400){
+      S.prog.odo += d/1000;
+      if (!S.cells.has(ck) || S.recentCells.includes(ck)) S.prog.newKm += d/1000;
+      const dt = Math.max(.2, (now - S.lastArriveT)/1000);
+      const inst = Math.min(110, d/dt*3.6);
+      S.speedKmh = S.speedKmh ? S.speedKmh*.5 + inst*.5 : inst;
+    }
+  }
+  if (!S.cells.has(ck)){ S.cells.add(ck); S.recentCells.push(ck); if (S.recentCells.length > 4) S.recentCells.shift(); }
+  S.pos = pos; S.lastArriveT = now; S.curZoom = -1;
+  S.trail[S.trail.length - 1].push([+pos.lat.toFixed(5), +pos.lng.toFixed(5)]);
+  if (curLine) curLine.getPath().push(new google.maps.LatLng(pos.lat, pos.lng));
+  updatePlayer();
+  if (!bigOpen && map) map.panTo(pos);
+  bump();
+  checkGoals();
+  passengerStep();
+  if (++S.hopCount % 8 === 0) saveSoon();
+  updateHud();
+}
+
+function fxLoop(){
+  requestAnimationFrame(fxLoop);
+  if (!pano || !S.started) return;
+  const now = performance.now();
+  if (now - S.lastFx < 50) return;
+  S.lastFx = now;
+  let z = S.baseZoom;
+  if (S.settings.zoomFx && S.gear > 0 && !S.waitingTurn && !paused()){
+    const ph = Math.min(1, (now - S.lastArriveT)/GEAR_MS[S.gear]);
+    z += ph*(0.06 + 0.035*S.gear);
+  }
+  if (Math.abs(z - S.curZoom) > 0.004){ S.curZoom = z; pano.setZoom(z); }
+  // speed decay when stuck/stopped
+  if (now - S.lastArriveT > 2600 || S.gear === 0){ S.speedKmh *= 0.9; if (S.speedKmh < 0.5) S.speedKmh = 0; $('#spd').textContent = Math.round(S.speedKmh); }
+}
+
+/* ---------- controls ---------- */
+function setGear(n){
+  n = Math.max(0, Math.min(4, n));
+  const prev = S.gear; S.gear = n;
+  if (prev > 0 && n === 0) onStopped();
+  if (prev === 0 && n > 0){ S.lastArriveT = performance.now(); schedule(GEAR_MS[n]*0.6); }
+  $('#speedfx').style.opacity = n ? (0.25 + n*0.15) : 0;
+  document.documentElement.style.setProperty('--sway', (2 + n*2.5) + 'deg');
+  engineUpdate(); updateHud();
+}
+let blinkTick = null;
+function setBlinker(side){
+  S.blinker = side; S.blinkHops = 0;
+  $('#blL').classList.toggle('on', side === 'L'); $('#blR').classList.toggle('on', side === 'R');
+  clearInterval(blinkTick);
+  if (side) blinkTick = setInterval(sfx.tick, 400);
+  if (side && S.waitingTurn){
+    const res = chooseLink(pano ? pano.getLinks() || [] : []);
+    if (!res.link) toast(side === 'L' ? LOC().ph.noLeft : LOC().ph.noRight);
+    schedule(0);
+  }
+}
+function pulseBlinkers(on){ $('#blL').classList.toggle('pulse', on); $('#blR').classList.toggle('pulse', on); }
+function uTurn(){
+  S.travelHeading = norm(S.travelHeading + 180); S.lookOffset = 0;
+  S.waitingTurn = null; pulseBlinkers(false); setBlinker(null);
+  turnWheel(180); applyPov(); updateBanner(); schedule(300);
+}
+function turnWheel(a){
+  const w = $('#wheelBtn'); w.style.transform = `rotate(${Math.max(-120, Math.min(120, a))}deg)`;
+  clearTimeout(turnWheel.t); turnWheel.t = setTimeout(() => w.style.transform = '', 650);
+}
+function bump(){
+  for (const id of ['#hood', '#dash']){ const el = $(id); el.classList.remove('bump'); void el.offsetWidth; el.classList.add('bump'); }
+}
+
+/* ---------- passengers ---------- */
+function passengerStep(){
+  if (!S.settings.passengers){ S.hail = null; return; }
+  const L = LOC();
+  if (S.hail){
+    if (--S.hail.left <= 0){ S.hail = null; toast('🙋 You drove past the passenger…'); }
+  } else if (S.gear > 0 && S.riders.length < 14 && S.prog && Math.random() < 0.035){
+    S.hail = {left: 9}; sfx.ding(); say(L.ph.hail);
+  }
+  for (const r of S.riders){
+    if (!r.want && S.prog.odo >= r.dropAt){ r.want = true; r.left = 8; say(L.ph.stop); sfx.ding(); }
+    else if (r.want && !r.missed && --r.left <= 0){ r.missed = true; toast('😠 ' + L.ph.missed); }
+  }
+  updateBanner();
+}
+function onStopped(){
+  if (!S.settings.passengers || !S.prog) return;
+  const L = LOC();
+  const out = S.riders.filter(r => r.want);
+  if (out.length){
+    let sum = 0;
+    for (const r of out){
+      let fare = L.fare(S.prog.odo - r.from);
+      if (r.missed){ fare *= .5; S.prog.missed++; } else S.prog.delivered++;
+      sum += fare;
+    }
+    S.prog.money += sum;
+    S.riders = S.riders.filter(r => !r.want);
+    sfx.coin(); say(L.ph.thanks);
+    toast(`🚶 ${out.length} off · <b>+${money(sum)}</b>`);
+  }
+  if (S.hail){
+    S.hail = null;
+    S.riders.push({from:S.prog.odo, dropAt:S.prog.odo + 0.4 + Math.random()*3.2});
+    setTimeout(() => { sfx.coin(); say(L.ph.board); toast(`🙋 ${L.ph.board} Passenger on board`); }, out.length ? 900 : 200);
+  }
+  saveSoon(); updateBanner(); updateHud();
+}
+
+/* ---------- goals ---------- */
+function checkGoals(){
+  const L = LOC();
+  for (const g of L.goals){
+    if (S.prog.goals[g.id]) continue;
+    if (dist(S.pos, g) <= g.r){
+      S.prog.goals[g.id] = Date.now(); saveSoon(); celebrate(g); refreshGoalMarkers();
+      if (S.targetId === g.id) S.targetId = null;
+    }
+  }
+}
+function celebrate(g){
+  const L = LOC(), c = $('#celebrate');
+  const all = L.goals.every(x => S.prog.goals[x.id]);
+  c.innerHTML = `<div class="big">${g.icon}</div><div class="t">${g.reach || L.ph.reach}</div><div class="n">${g.name}</div>` +
+                (all ? `<div class="n" style="margin-top:8px">🏆 All ${L.goals.length} goals reached!</div>` : '');
+  c.classList.add('show'); sfx.fanfare(); say(g.reach || L.ph.reach);
+  for (let i = 0; i < 26; i++){
+    const s = document.createElement('span'); s.className = 'conf';
+    s.textContent = ['🎉','✨',g.icon,'🪙','🎊'][i % 5];
+    s.style.left = Math.random()*100 + 'vw'; s.style.animationDuration = (1.8 + Math.random()*1.6) + 's';
+    s.style.animationDelay = Math.random()*.5 + 's';
+    document.body.appendChild(s); setTimeout(() => s.remove(), 4200);
+  }
+  clearTimeout(celebrate.t); celebrate.t = setTimeout(() => c.classList.remove('show'), 3200);
+}
+function currentTarget(){
+  const L = LOC();
+  if (S.targetId){ const g = L.goals.find(g => g.id === S.targetId); if (g) return g; }
+  if (!S.pos) return L.goals[0];
+  let best = null, bd = Infinity;
+  for (const g of L.goals){ if (S.prog && S.prog.goals[g.id]) continue; const d = dist(S.pos, g); if (d < bd){ bd = d; best = g; } }
+  return best || L.goals[0];
+}
+function cycleTarget(){
+  const L = LOC(), ids = [null, ...L.goals.map(g => g.id)];
+  S.targetId = ids[(ids.indexOf(S.targetId) + 1) % ids.length];
+  const g = currentTarget();
+  toast(S.targetId ? `🎯 Target: ${g.name}` : `🎯 Target: nearest unvisited (${g.name})`);
+  updateHud();
+}
+
+/* ---------- map overlays ---------- */
+function newCurLine(){
+  if (!map) return;
+  curLine = new G.Polyline({map, path:[], strokeColor:'#facc15', strokeOpacity:.95, strokeWeight:4, clickable:false, zIndex:5});
+  trailLines.push(curLine);
+}
+function rebuildOverlays(){
+  if (!map) return;
+  trailLines.forEach(l => l.setMap(null)); trailLines = []; curLine = null;
+  for (const seg of S.trail){
+    if (seg.length < 2) continue;
+    trailLines.push(new G.Polyline({map, path:seg.map(([a, b]) => ({lat:a, lng:b})), strokeColor:'#facc15',
+      strokeOpacity:.95, strokeWeight:4, clickable:false, zIndex:5}));
+  }
+  newCurLine();
+  refreshGoalMarkers();
+  if (playerMk){ playerMk.setMap(null); playerMk = null; }
+}
+function refreshGoalMarkers(){
+  if (!map) return;
+  goalMks.forEach(m => m.setMap(null)); goalMks = [];
+  for (const g of LOC().goals){
+    const done = !!(S.prog && S.prog.goals[g.id]);
+    goalMks.push(new G.Circle({map, center:{lat:g.lat, lng:g.lng}, radius:g.r, clickable:false,
+      strokeColor: done ? '#22c55e' : '#0ea5e9', strokeWeight:2, fillColor: done ? '#22c55e' : '#38bdf8', fillOpacity:.18, zIndex:3}));
+    if (G.Marker){
+      goalMks.push(new G.Marker({map, position:{lat:g.lat, lng:g.lng}, title:g.name, clickable:false, zIndex:6,
+        icon:{path:google.maps.SymbolPath.CIRCLE, scale:13, fillColor: done ? '#16a34a' : '#0284c7', fillOpacity:1, strokeColor:'#fff', strokeWeight:2},
+        label:{text: done ? '✓' : g.icon, fontSize:'15px', color:'#fff'}}));
+    }
+  }
+}
+function updatePlayer(){
+  if (!map || !S.pos) return;
+  if (G.Marker){
+    const icon = {path:google.maps.SymbolPath.FORWARD_CLOSED_ARROW, scale:6, rotation:S.travelHeading,
+                  fillColor:'#ef4444', fillOpacity:1, strokeColor:'#fff', strokeWeight:2};
+    if (!playerMk) playerMk = new G.Marker({map, position:S.pos, icon, zIndex:99, clickable:false});
+    else { playerMk.setPosition(S.pos); playerMk.setIcon(icon); }
+  } else {
+    if (!playerMk) playerMk = new G.Circle({map, center:S.pos, radius:20, fillColor:'#ef4444', fillOpacity:1, strokeColor:'#fff', strokeWeight:2, zIndex:99});
+    else playerMk.setCenter(S.pos);
+  }
+}
+function openMap(){
+  if (!map) return;
+  bigOpen = true; document.body.classList.add('mapopen');
+  map.setOptions({gestureHandling:'greedy', zoomControl:true, mapTypeControl:true, mapTypeControlOptions:{position: google.maps.ControlPosition ? google.maps.ControlPosition.LEFT_BOTTOM : undefined}});
+  if (S.pos){ map.setCenter(S.pos); map.setZoom(13); }
+  renderSheet(); engineUpdate();
+}
+function closeMap(){
+  if (!map) return;
+  bigOpen = false; jumpMode = false; document.body.classList.remove('mapopen', 'jump');
+  $('#jumpBtn').classList.remove('on');
+  map.setOptions({gestureHandling:'none', zoomControl:false, mapTypeControl:false});
+  map.setZoom(16); if (S.pos) map.setCenter(S.pos);
+  engineUpdate(); schedule(100);
+}
+function renderSheet(){
+  const L = LOC(), P = S.prog;
+  const done = L.goals.filter(g => P.goals[g.id]).length;
+  const rating = P.delivered + P.missed ? Math.round(100*P.delivered/(P.delivered + P.missed)) + '%' : '—';
+  let h = `<div class="stats">
+    <span>Odometer <b>${P.odo.toFixed(1)} km</b></span><span>New roads <b>${P.newKm.toFixed(1)} km</b></span>
+    <span>Goals <b>${done}/${L.goals.length}</b></span><span>Fares <b>${money(P.money)}</b></span>
+    <span>Passengers <b>${P.delivered}</b></span><span>On time <b>${rating}</b></span></div>
+    <div class="note" style="margin-bottom:4px">Blue lines = roads with Street View · yellow = where you've driven. Tap a goal to see it.</div>`;
+  for (const g of L.goals){
+    const d = S.pos ? fmtKm(dist(S.pos, g)/1000) : '';
+    h += `<div class="goalrow ${P.goals[g.id] ? 'done' : ''}" data-g="${g.id}"><span class="gi">${P.goals[g.id] ? '✅' : g.icon}</span>
+          <span class="gn">${g.name}</span><span class="gd">${d}</span></div>`;
+  }
+  $('#bigSheet').innerHTML = h;
+  $('#bigSheet').querySelectorAll('.goalrow').forEach(el => el.onclick = () => {
+    const g = L.goals.find(x => x.id === el.dataset.g); map.panTo(g); map.setZoom(14);
+    S.targetId = g.id; updateHud();
+  });
+}
+
+/* ---------- HUD ---------- */
+function updateHud(){
+  const L = LOC(), P = S.prog; if (!P) return;
+  $('#spd').textContent = Math.round(S.gear ? S.speedKmh : 0);
+  $('#gearLbl').textContent = S.gear ? S.gear : 'N';
+  $('#odoLbl').textContent = P.odo.toFixed(1) + ' km';
+  const done = L.goals.filter(g => P.goals[g.id]).length;
+  $('#chipGoals').textContent = `${L.icon} ${done}/${L.goals.length}`;
+  $('#chipRiders').textContent = `👥 ${S.riders.length}`;
+  $('#chipRiders').hidden = !S.settings.passengers; $('#chipMoney').hidden = !S.settings.passengers;
+  $('#chipMoney').textContent = money(P.money);
+  $('#chipNew').textContent = `🆕 ${P.newKm.toFixed(1)} km`;
+  const g = currentTarget();
+  if (g){
+    $('#tName').textContent = (P.goals[g.id] ? '✅ ' : g.icon + ' ') + g.name;
+    if (S.pos){
+      $('#tDist').textContent = fmtKm(dist(S.pos, g)/1000) + (S.targetId ? '' : ' · nearest');
+      const rel = angDiff(bearing(S.pos, g), S.travelHeading + S.lookOffset);
+      $('#tArrow').style.transform = `rotate(${rel}deg)`;
+    }
+  }
+  if (bigOpen) renderSheet();
+}
+function updateBanner(){
+  const L = LOC(), b = $('#banner');
+  let html = '', cls = '';
+  const want = S.riders.find(r => r.want && !r.missed);
+  if (want){ html = `🔔 <b>${L.ph.stop}</b> Press ■ STOP<br><span class="cd">${'●'.repeat(Math.max(0, want.left))}</span>`; cls = 'alert'; }
+  else if (S.hail){ html = `🙋 <b>${L.ph.hail}</b> Press ■ STOP to pick up<br><span class="cd">${'●'.repeat(S.hail.left)}</span>`; cls = 'hail'; }
+  else if (S.waitingTurn === 'choose'){ html = `↔️ <b>${L.ph.choose}</b><br>Junction – tap ◀ or ▶`; cls = 'turn'; }
+  else if (S.waitingTurn === 'dead'){ html = `⛔ <b>End of the road</b><br>Tap ↶ U-turn`; cls = 'turn'; }
+  b.className = html ? 'show ' + cls : ''; if (html) b.innerHTML = html;
+}
+
+/* =====================================================================
+   Game flow
+   ===================================================================== */
+function applyLocUI(){
+  const L = LOC();
+  document.body.classList.remove('ph', 'sk'); document.body.classList.add(L.cls);
+  $('#sign').textContent = L.sign;
+  renderLocCards();
+}
+function renderLocCards(){
+  for (const box of [$('#setupLocs'), $('#menuLocs')]){
+    box.innerHTML = Object.values(LOCS).map(L =>
+      `<button class="loc ${L.id === S.settings.loc ? 'sel' : ''}" data-loc="${L.id}"><span class="f">${L.flag}</span>
+       <span><b>${L.name}</b><span>${L.sub}</span></span></button>`).join('');
+    box.querySelectorAll('.loc').forEach(btn => btn.onclick = () => chooseLoc(btn.dataset.loc, box.id === 'menuLocs'));
+  }
+}
+async function chooseLoc(id, inGame){
+  if (!inGame){ S.settings.loc = id; store.set('jeep.settings', S.settings); applyLocUI(); return; }
+  if (id === S.settings.loc){ closeMenu(); return; }
+  saveNow(); setGear(0);
+  S.settings.loc = id; store.set('jeep.settings', S.settings);
+  applyLocUI(); loadProgress(id); rebuildOverlays(); updateBanner();
+  closeMenu(); toast('Driving to ' + LOC().startLabel + '…');
+  try{
+    const ok = await jumpTo(LOC().start);
+    if (!ok) toast('No Street View found near ' + LOC().startLabel);
+    else { toast(`${LOC().flag} ${LOC().ph.greet}`); say(LOC().ph.greet); }
+  }catch(e){ if (e.message === 'AUTH') showAuthError(); }
+  updateHud();
+}
+
+async function onStart(){
+  audioInit();
+  const kv = $('#keyInput').value.trim();
+  if (kv){ S.key = kv; store.set('jeep.key', kv); }
+  if (!S.key){ $('#setupErr').textContent = 'Paste your Google Maps API key first (see “How to get a key”).'; $('#keyHelp').open = true; return; }
+  S.settings.passengers = $('#optPass').checked; S.settings.sound = $('#optSound').checked; S.settings.zoomFx = $('#optZoom').checked;
+  store.set('jeep.settings', S.settings);
+  const btn = $('#startBtn'); btn.disabled = true; btn.textContent = 'Starting the engine…'; $('#setupErr').textContent = '';
+  try{
+    await loadMaps(S.key);
+    if (!pano) await initGoogle();
+    applyLocUI(); loadProgress(S.settings.loc); rebuildOverlays();
+    const ok = await jumpTo(LOC().start);
+    if (authFailed) return;
+    if (!ok) throw new Error('No Street View found near ' + LOC().startLabel + '.');
+    S.started = true;
+    $('#setup').hidden = true;
+    setGear(0); updateHud(); updateBanner();
+    toast(`${LOC().flag} ${LOC().ph.greet} Press ▲ GAS`, 3500); say(LOC().ph.greet);
+    keepAwake(); schedule(200);
+  }catch(e){
+    if (e.message === 'AUTH' || authFailed){ showAuthError(); }
+    else $('#setupErr').textContent = e.message || String(e);
+  }finally{ btn.disabled = false; btn.textContent = 'START ENGINE'; }
+}
+
+function showAuthError(){
+  authFailed = true; S.started = false;
+  $('#authErr').hidden = false; $('#setup').hidden = true;
+}
+function openMenu(){
+  if (!S.started) return;
+  S.menuOpen = true; $('#menu').hidden = false;
+  $('#mPass').checked = S.settings.passengers; $('#mSound').checked = S.settings.sound; $('#mZoom').checked = S.settings.zoomFx;
+  renderLocCards(); engineUpdate(); saveNow();
+}
+function closeMenu(){ S.menuOpen = false; $('#menu').hidden = true; engineUpdate(); schedule(100); }
+
+let wakeLock = null;
+async function keepAwake(){ try{ if ('wakeLock' in navigator) wakeLock = await navigator.wakeLock.request('screen'); }catch(e){} }
+
+/* ---------- wiring ---------- */
+function press(el, fn){ el.addEventListener('click', e => { e.preventDefault(); audioInit(); fn(e); }); }
+press($('#gasBtn'),   () => setGear(S.gear + 1));
+press($('#brakeBtn'), () => setGear(S.gear - 1));
+press($('#stopBtn'),  () => setGear(0));
+press($('#uturnBtn'), uTurn);
+press($('#blL'), () => setBlinker(S.blinker === 'L' ? null : 'L'));
+press($('#blR'), () => setBlinker(S.blinker === 'R' ? null : 'R'));
+press($('#wheelBtn'), sfx.horn);
+press($('#target'), cycleTarget);
+press($('#mapHit'), openMap);
+press($('#closeMap'), closeMap);
+press($('#meBtn'), () => { if (S.pos){ map.panTo(S.pos); map.setZoom(15); } });
+press($('#jumpBtn'), () => { jumpMode = !jumpMode; $('#jumpBtn').classList.toggle('on', jumpMode); document.body.classList.toggle('jump', jumpMode); });
+press($('#menuBtn'), openMenu);
+press($('#resumeBtn'), closeMenu);
+press($('#homeBtn'), async () => { closeMenu(); setGear(0); toast('Back to ' + LOC().startLabel + '…'); await jumpTo(LOC().start).catch(() => {}); });
+press($('#resetBtn'), () => {
+  if (!confirm('Reset odometer, trail, goals and fares for ' + LOC().name + '?')) return;
+  const loc = S.settings.loc; ['prog', 'trail', 'cells'].forEach(k => store.del(`jeep.${k}.${loc}`));
+  const keepPos = S.pos; loadProgress(loc); S.pos = keepPos; rebuildOverlays(); updatePlayer(); updateHud(); toast('Progress reset');
+});
+press($('#keyBtn'), () => { if (!confirm('Forget the saved API key and reload?')) return; store.del('jeep.key'); location.reload(); });
+press($('#fsBtn'), () => { const d = document.documentElement; (d.requestFullscreen || d.webkitRequestFullscreen || (() => {})).call(d); });
+press($('#authRetry'), () => { store.del('jeep.key'); location.reload(); });
+press($('#startBtn'), onStart);
+press($('#keyShow'), () => { const i = $('#keyInput'); i.type = i.type === 'password' ? 'text' : 'password'; $('#keyShow').textContent = i.type === 'password' ? 'Show' : 'Hide'; });
+for (const [id, key] of [['#mPass', 'passengers'], ['#mSound', 'sound'], ['#mZoom', 'zoomFx']]){
+  $(id).addEventListener('change', e => {
+    S.settings[key] = e.target.checked; store.set('jeep.settings', S.settings);
+    if (key === 'passengers' && !e.target.checked){ S.hail = null; S.riders = []; updateBanner(); }
+    if (key === 'zoomFx' && pano){ S.curZoom = -1; }
+    engineUpdate(); updateHud();
+  });
+}
+addEventListener('keydown', e => {
+  if (!S.started || S.menuOpen) return;
+  const k = e.key.toLowerCase(); let used = true;
+  if (k === 'arrowup' || k === 'w') setGear(S.gear + 1);
+  else if (k === 'arrowdown') setGear(S.gear - 1);
+  else if (k === 'arrowleft' || k === 'a') setBlinker(S.blinker === 'L' ? null : 'L');
+  else if (k === 'arrowright' || k === 'd') setBlinker(S.blinker === 'R' ? null : 'R');
+  else if (k === ' ') sfx.horn();
+  else if (k === 's' || k === 'x') setGear(0);
+  else if (k === 'u') uTurn();
+  else if (k === 'm') bigOpen ? closeMap() : openMap();
+  else if (k === 'escape'){ if (bigOpen) closeMap(); else openMenu(); }
+  else used = false;
+  if (used){ e.preventDefault(); audioInit(); }
+});
+document.addEventListener('visibilitychange', () => {
+  engineUpdate();
+  if (document.hidden) saveNow(); else if (S.started) keepAwake();
+});
+addEventListener('pagehide', saveNow);
+addEventListener('resize', () => computeBaseZoom());
+
+/* ---------- boot ---------- */
+(function boot(){
+  const local = location.protocol === 'file:' || location.origin === 'null';
+  const originTxt = local ? 'https://your-site.example/*' : location.origin + '/*';
+  $('#originHint').textContent = originTxt; $('#originHint2').textContent = originTxt;
+  $('#fileWarn').hidden = !local;
+  $('#keyInput').value = S.key;
+  if (!S.key) $('#keyHelp').open = true;
+  $('#optPass').checked = S.settings.passengers; $('#optSound').checked = S.settings.sound; $('#optZoom').checked = S.settings.zoomFx;
+  applyLocUI();
+  if ('speechSynthesis' in window) speechSynthesis.getVoices();
+})();
+</script>
+</body>
+</html>
