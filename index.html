@@ -81,6 +81,38 @@ body.mapopen #modeBtn,body.mapopen .roofbtn{display:none}
 .pick{display:flex;align-items:center;gap:8px}
 .pick > div{flex:1;min-width:0}
 .pick .big-btn{width:auto;margin:0;padding:12px 16px;font-size:16px}
+#catRow{display:none}
+body.mapopen #catRow{display:flex;position:fixed;top:calc(env(safe-area-inset-top) + 58px);left:0;right:0;z-index:41;gap:6px;
+  overflow-x:auto;padding:0 8px 4px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.cat{flex:none;padding:7px 11px;border-radius:999px;background:rgba(15,23,42,.88);border:1px solid #475569;font-size:13px;font-weight:700;white-space:nowrap;color:#94a3b8}
+.cat.on{background:#f8fafc;color:#0f172a;border-color:#fff}
+.pickBtns{display:flex;gap:8px;margin-top:8px}
+.pickBtns .big-btn{flex:1;margin:0;padding:12px;font-size:16px}
+.photoBtn{flex:1;background:#1e40af;border-color:#60a5fa;font-size:15px}
+#nearCard{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--dash-h) + var(--hood-h) + 12px);z-index:9;
+  display:flex;align-items:center;gap:10px;max-width:92vw;padding:8px 10px 8px 12px;border-radius:16px;text-align:left;
+  background:rgba(15,23,42,.92);border:2px solid #fbbf24;box-shadow:0 6px 18px rgba(0,0,0,.45);animation:pop .4s}
+body.chase #nearCard,body.world #nearCard{bottom:calc(var(--dash-h) + 12px)}
+#nearIcon{font-size:26px} #nearCard .nt{display:flex;flex-direction:column;min-width:0}
+#nearName{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:52vw}
+#nearDist{font-size:12px;color:#fde68a}
+#nearCard .cam{font-size:22px} #nearX{padding:4px 6px;color:#94a3b8;font-size:15px}
+#gallery{position:fixed;inset:0;z-index:58;background:#05070c;display:flex;flex-direction:column;
+  padding:calc(env(safe-area-inset-top) + 8px) 10px calc(env(safe-area-inset-bottom) + 10px)}
+#gallery[hidden]{display:none}
+.gTop{display:flex;align-items:center;gap:8px} .gT{flex:1;min-width:0}
+#gName{font-size:18px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#gWrap{position:relative;flex:1;margin:8px 0;border-radius:14px;overflow:hidden;background:#111827;touch-action:pan-y}
+#gImg{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;-webkit-user-drag:none}
+#gNone,#gLoading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#94a3b8;font-size:14px;pointer-events:none}
+#gNone[hidden],#gLoading[hidden]{display:none}
+#gPrev,#gNext{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:64px;font-size:34px;background:rgba(0,0,0,.35);color:#fff;border-radius:10px}
+#gPrev{left:6px} #gNext{right:6px}
+#gDots{display:flex;justify-content:center;gap:6px;min-height:8px}
+#gDots span{width:7px;height:7px;border-radius:50%;background:#475569} #gDots span.on{background:#fbbf24}
+#gAttr{text-align:center;margin:6px 0} #gAttr a{color:#93c5fd}
+.gBtns{display:flex;gap:8px;align-items:center} .gBtns .big-btn{flex:1;margin:0;padding:13px;font-size:16px}
+.gBtns a{text-decoration:none;text-align:center;color:#fff} .gFoot{text-align:center;margin-top:6px;font-size:11px}
 #wAttr{display:none;position:fixed;left:6px;right:6px;bottom:calc(var(--dash-h) + 4px);z-index:3;font-size:10px;color:#fff;
   text-shadow:0 1px 2px #000;pointer-events:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #wAttr b{font-size:13px;margin-right:6px}
@@ -159,13 +191,13 @@ body.world #wAttr{display:block}
 #mapHit{position:absolute;inset:0;z-index:2}
 #mapLabel{position:absolute;top:4px;left:50%;transform:translateX(-50%);font-size:10px;font-weight:800;
   background:rgba(0,0,0,.6);padding:1px 6px;border-radius:6px;z-index:3;pointer-events:none}
-body.mapopen #mapWrap{top:0;left:0;right:0;bottom:calc(24vh + env(safe-area-inset-bottom) + 14px);width:auto;height:auto;border-radius:0;border:0;z-index:40}
+body.mapopen #mapWrap{top:0;left:0;right:0;bottom:calc(27vh + env(safe-area-inset-bottom) + 14px);width:auto;height:auto;border-radius:0;border:0;z-index:40}
 body.mapopen::before{content:"";position:fixed;inset:0;background:#0b1220;z-index:39}
 body.mapopen #mapHit,body.mapopen #mapLabel{display:none}
 #bigBar,#bigSheet{display:none}
 body.mapopen #bigBar{display:flex;position:fixed;top:calc(env(safe-area-inset-top) + 8px);left:8px;right:8px;gap:6px;z-index:41;flex-wrap:wrap}
 body.mapopen #bigSheet{display:block;position:fixed;left:8px;right:8px;bottom:calc(env(safe-area-inset-bottom) + 6px);z-index:41;
-  height:24vh;overflow:auto;background:rgba(15,23,42,.92);border-radius:14px;padding:10px 12px;font-size:13px;
+  height:27vh;overflow:auto;background:rgba(15,23,42,.92);border-radius:14px;padding:10px 12px;font-size:13px;
   border:1px solid #334155}
 .pill{padding:9px 12px;border-radius:999px;background:rgba(15,23,42,.9);border:1px solid #475569;font-weight:700;font-size:13px}
 .pill.on{background:#0369a1;border-color:#38bdf8}
@@ -349,12 +381,24 @@ kbd{background:#1e293b;border:1px solid #475569;border-radius:5px;padding:0 5px;
 <div id="mapWrap"><div id="map"></div><button id="mapHit" aria-label="Open map"></button><span id="mapLabel">MAP</span></div>
 <div id="bigBar">
   <button class="pill" id="closeMap">✕ Back</button>
-  <button class="pill" id="fSights">⭐ Sights</button>
-  <button class="pill" id="fBiz">🏪 Shops &amp; food</button>
-  <button class="pill" id="fRoads">🔵 SV roads</button>
+  <button class="pill" id="searchBtn">🔎 Search here</button>
   <button class="pill" id="meBtn">⌖ Me</button>
+  <button class="pill" id="fRoads">🔵 SV roads</button>
 </div>
+<div id="catRow"></div>
 <div id="bigSheet"></div>
+
+<button id="nearCard" hidden><span id="nearIcon">⭐</span><span class="nt"><b id="nearName"></b><span id="nearDist"></span></span><span class="cam">📷</span><span id="nearX" aria-label="Dismiss">✕</span></button>
+
+<div id="gallery" hidden>
+  <div class="gTop"><div class="gT"><b id="gName"></b><div id="gSub" class="note"></div></div><button class="pill" id="gClose">✕</button></div>
+  <div id="gWrap"><img id="gImg" alt=""><div id="gNone" hidden>No photos of this place on Google Maps yet</div>
+    <div id="gLoading">Loading photo…</div><button id="gPrev" aria-label="Previous photo">‹</button><button id="gNext" aria-label="Next photo">›</button></div>
+  <div id="gDots"></div>
+  <div id="gAttr" class="note"></div>
+  <div class="gBtns"><a id="gMaps" class="pill" target="_blank" rel="noopener">Open in Google Maps</a><button class="big-btn" id="gRide">🚙 Ride here</button></div>
+  <div class="note gFoot">Photos &amp; place info: Google Maps</div>
+</div>
 
 <div id="banner"></div>
 <div id="toast"></div>
@@ -375,10 +419,10 @@ kbd{background:#1e293b;border:1px solid #475569;border-radius:5px;padding:0 5px;
       <ol>
         <li>Open <a href="https://console.cloud.google.com/" target="_blank" rel="noopener" style="color:#7dd3fc">console.cloud.google.com</a> and create a project (e.g. “Jeepney”).</li>
         <li><b>Billing</b> → link a billing account (a card is required). Google includes free monthly usage per API, and this game uses <b>one Street View session each time you press Start</b>.</li>
-        <li><b>APIs &amp; Services → Library</b> → enable <b>Maps JavaScript API</b> (plus <b>Street View Static API</b> for Photo mode and <b>Map Tiles API</b> for the 3D world).</li>
+        <li><b>APIs &amp; Services → Library</b> → enable <b>Maps JavaScript API</b> and <b>Places API (New)</b> (things to do &amp; photos), plus <b>Street View Static API</b> for Photo mode and <b>Map Tiles API</b> for the 3D world.</li>
         <li><b>APIs &amp; Services → Credentials → Create credentials → API key</b>. Copy it here.</li>
         <li>Edit the key → <b>Application restrictions: Websites</b> → add <code id="originHint">https://your-site.example/*</code><br>
-            <b>API restrictions</b> → Maps JavaScript API (+ Street View Static API, Map Tiles API) → Save.</li>
+            <b>API restrictions</b> → Maps JavaScript API, Places API (New) (+ Street View Static API, Map Tiles API) → Save.</li>
         <li>Optional safety net: <b>Billing → Budgets &amp; alerts</b> → set a small budget alert, and/or lower the daily limits in the API's <b>Quotas</b> page.</li>
       </ol>
       <p id="fileWarn" class="err" hidden>You opened this file directly from disk. Google's “Websites” restriction can't match local files — upload this file to a website (any HTTPS hosting) and open it from there.</p>
@@ -403,7 +447,7 @@ kbd{background:#1e293b;border:1px solid #475569;border-radius:5px;padding:0 5px;
 
   <div class="card">
     <h2>Controls</h2>
-    <p><b>🗺 Map</b> (top right): tap a ⭐ attraction or any spot → <b>🚙 Ride here</b>. The ★ pill then points to it.<br>
+    <p><b>🗺 Map</b> (top right): beaches 🏖️, waterfalls 💧, hiking 🥾, sights ⭐, islands 🏝️, viewpoints 🌄 and more. Tap one → <b>📷 Photos</b> or <b>🚙 Ride here</b>. While riding, a card pops up when you pass something nearby – tap it to stop and see photos.<br>
        <b>🌍 3D / 👁 Street</b> switches between Google’s 3D world and Street View.<br>
        <b>▲ GAS / ▼ BRAKE</b> change speed, <b>◀ ▶</b> are turn signals (the jeepney turns at the next junction on that side), <b>↶</b> U-turn, drag the street view to look around.</p>
     <p class="note">Keyboard: <kbd>↑</kbd>/<kbd>↓</kbd> gear · <kbd>←</kbd>/<kbd>→</kbd> signals · <kbd>Space</kbd> horn · <kbd>S</kbd> stop · <kbd>U</kbd> U-turn · <kbd>M</kbd> map</p>
@@ -483,6 +527,7 @@ function bearing(a, b){
 }
 const cellKey = p => Math.round(p.lat*4000) + ':' + Math.round(p.lng*4000);   // ~25 m grid
 const fmtKm = m => (m >= 10 ? m.toFixed(0) : m.toFixed(1)) + ' km';
+const fmtDist = m => m < 1000 ? Math.round(m/10)*10 + ' m' : fmtKm(m/1000);
 
 /* ---------- locations ---------- */
 const LOCS = {
@@ -523,7 +568,7 @@ const S = {
 };
 if (!LOCS[S.settings.loc]) S.settings.loc = 'manila';
 if (!S.settings.v2){ S.settings.zoomFx = false; S.settings.v2 = true; store.set('jeep.settings', S.settings); }   // motion effect now opt-in
-const paused = () => S.menuOpen || bigOpen || document.hidden || !S.started;
+const paused = () => S.menuOpen || bigOpen || S.galleryOpen || document.hidden || !S.started;
 
 /* ---------- small UI helpers ---------- */
 let toastT;
@@ -870,7 +915,7 @@ function onArrive(){
   showPhoto(); prefetchNext();
   if (!bigOpen && map) map.panTo(pos);
   bump();
-  checkDestination();
+  checkDestination(); checkNearby(); maybeAutoSearch();
   if (++S.hopCount % 8 === 0) saveSoon();
   updateHud();
 }
@@ -994,55 +1039,221 @@ function updatePlayer(){
 // what the map shows: attractions (sights, parks, churches), businesses, Street View roads
 function applyMapStyle(){
   if (!map) return;
-  const st = S.settings, styles = [{featureType:'poi', stylers:[{visibility:'off'}]}];
-  if (st.mapSights) for (const f of ['poi.attraction', 'poi.park', 'poi.place_of_worship'])
-    styles.push({featureType:f, stylers:[{visibility:'on'}]});
-  if (st.mapBiz) styles.push({featureType:'poi.business', stylers:[{visibility:'on'}]});
+  // Google's own map icons: keep sights, parks & churches; hide shops (our own markers cover things to do)
+  const styles = [{featureType:'poi', stylers:[{visibility:'off'}]}];
+  for (const f of ['poi.attraction', 'poi.park', 'poi.place_of_worship']) styles.push({featureType:f, stylers:[{visibility:'on'}]});
   map.setOptions({styles});
-  if (coverage) coverage.setMap(st.mapRoads ? map : null);
-  $('#fSights').classList.toggle('on', !!st.mapSights);
-  $('#fBiz').classList.toggle('on', !!st.mapBiz);
-  $('#fRoads').classList.toggle('on', !!st.mapRoads);
+  if (coverage) coverage.setMap(S.settings.mapRoads ? map : null);
+  $('#fRoads').classList.toggle('on', !!S.settings.mapRoads);
 }
 function toggleMapFilter(key){ S.settings[key] = !S.settings[key]; store.set('jeep.settings', S.settings); applyMapStyle(); }
+
+/* =====================================================================
+   Things to do – Google Places (New): beaches, waterfalls, hiking, sights…
+   ===================================================================== */
+const CATS = [
+  {id:'beach',  icon:'🏖️', name:'Beaches',          q:'beach',                  color:'#0284c7', on:true},
+  {id:'falls',  icon:'💧', name:'Waterfalls',       q:'waterfall',              color:'#0891b2', on:true},
+  {id:'hike',   icon:'🥾', name:'Hiking',           q:'hiking trail',           color:'#15803d', on:true},
+  {id:'sight',  icon:'⭐', name:'Sights',           q:'tourist attraction',     color:'#d97706', on:true},
+  {id:'island', icon:'🏝️', name:'Islands',          q:'island',                 color:'#0d9488', on:true},
+  {id:'view',   icon:'🌄', name:'Viewpoints',       q:'viewpoint',              color:'#9333ea', on:true},
+  {id:'museum', icon:'🏛️', name:'Museums & history', q:'museum historical landmark', color:'#92400e', on:false},
+  {id:'dive',   icon:'🤿', name:'Diving & snorkel', q:'snorkeling diving spot', color:'#1d4ed8', on:false},
+  {id:'food',   icon:'🍽️', name:'Food',             q:'restaurant',             color:'#dc2626', on:false},
+  {id:'hotel',  icon:'🏨', name:'Hotels & resorts', q:'resort hotel',           color:'#475569', on:false}
+];
+const CAT = Object.fromEntries(CATS.map(c => [c.id, c]));
+if (!S.settings.cats) S.settings.cats = Object.fromEntries(CATS.map(c => [c.id, c.on]));
+for (const c of CATS) if (!(c.id in S.settings.cats)) S.settings.cats[c.id] = c.on;
+const TD = { places:new Map(), markers:new Map(), off:false, lib:null, near:null, dismissed:new Set(), lastAuto:null, busy:0, warned:false };
+// Pro-tier fields only (name, location, photo references, Maps link) → "Text Search Pro"
+const TD_FIELDS = ['id', 'displayName', 'location', 'photos', 'googleMapsURI', 'primaryTypeDisplayName'];
+const enabledCats = () => CATS.filter(c => S.settings.cats[c.id]);
+
+async function tdLib(){ if (!TD.lib) TD.lib = await google.maps.importLibrary('places'); return TD.lib; }
+function tdFail(e){
+  console.warn('Places search failed', e);
+  const msg = String(e && (e.message || e.code) || e);
+  if (/denied|not been used|disabled|not enabled|permission|forbidden|403|api key|billing/i.test(msg)) TD.off = true;
+  if (!TD.warned){
+    TD.warned = true;
+    setTimeout(() => toast(TD.off ? '📷 Things to do &amp; photos need the <b>Places API (New)</b> enabled for your key (Google Cloud → APIs &amp; Services → Library).'
+                 : 'Could not load things to do right now – try 🔎 Search here again.', 8000), S.started ? 0 : 4500);
+  }
+}
+function addThing(p, c){
+  if (!p || !p.id || !p.location || TD.places.has(p.id)) return false;
+  const loc = p.location, lat = typeof loc.lat === 'function' ? loc.lat() : loc.lat, lng = typeof loc.lng === 'function' ? loc.lng() : loc.lng;
+  TD.places.set(p.id, {id:p.id, name:p.displayName || c.name, cat:c.id, lat, lng, photos:p.photos || [],
+                       url:p.googleMapsURI || '', type:p.primaryTypeDisplayName || ''});
+  return true;
+}
+// search the given rectangle for every chosen category (one request per category)
+async function searchThings(bounds, cats){
+  if (TD.off || !cats.length) return 0;
+  let lib; try{ lib = await tdLib(); }catch(e){ tdFail(e); return 0; }
+  if (!lib.Place || !lib.Place.searchByText){ tdFail(new Error('Places library not available')); return 0; }
+  TD.busy++; updateSearchBtn();
+  let added = 0;
+  await Promise.all(cats.map(async c => {
+    try{
+      const res = await lib.Place.searchByText({textQuery:c.q, fields:TD_FIELDS, locationRestriction:bounds, maxResultCount:20, language:'en'});
+      for (const p of (res && res.places) || []) if (addThing(p, c)) added++;
+    }catch(e){ tdFail(e); }
+  }));
+  TD.busy--; updateSearchBtn();
+  renderThingMarkers(); checkNearby();
+  if (bigOpen) renderSheet();
+  return added;
+}
+function boundsAround(p, deg){ return {north:p.lat + deg, south:p.lat - deg, east:p.lng + deg, west:p.lng - deg}; }
+function viewBounds(){ const b = map && map.getBounds && map.getBounds(); return b ? b.toJSON() : boundsAround(S.pos || LOC().start, 0.04); }
+// look around the jeepney when you arrive somewhere new and every ~3.5 km of driving
+function maybeAutoSearch(){
+  if (TD.off || !S.pos || !map) return;
+  if (TD.lastAuto && dist(TD.lastAuto, S.pos) < 3500) return;
+  TD.lastAuto = {...S.pos};
+  searchThings(boundsAround(S.pos, 0.03), enabledCats());
+}
+async function searchHere(){
+  if (!map) return;
+  const bounds = viewBounds();
+  toast('🔎 Looking for things to do here…', 1800);
+  const n = await searchThings(bounds, enabledCats());
+  if (!TD.off) toast(n ? `Found ${n} new place${n === 1 ? '' : 's'}` : 'Nothing new here – zoom in or turn on more categories', 2500);
+}
+function updateSearchBtn(){ const b = $('#searchBtn'); if (b) b.textContent = TD.busy ? '⏳ Searching…' : '🔎 Search here'; }
+
+function renderThingMarkers(){
+  if (!map || !G.Marker) return;
+  for (const [id, t] of TD.places){
+    const on = !!S.settings.cats[t.cat];
+    let m = TD.markers.get(id);
+    if (!on){ if (m){ m.setMap(null); TD.markers.delete(id); } continue; }
+    if (!m){
+      const c = CAT[t.cat];
+      m = new G.Marker({map, position:{lat:t.lat, lng:t.lng}, title:t.name, zIndex:50,
+        icon:{path:google.maps.SymbolPath.CIRCLE, scale:12, fillColor:c.color, fillOpacity:1, strokeColor:'#fff', strokeWeight:2},
+        label:{text:c.icon, fontSize:'13px'}});
+      m.addListener('click', () => { if (bigOpen) pickThing(t); });
+      TD.markers.set(id, m);
+    }
+  }
+}
+function renderCatRow(){
+  $('#catRow').innerHTML = CATS.map(c => `<button class="cat ${S.settings.cats[c.id] ? 'on' : ''}" data-c="${c.id}">${c.icon} ${c.name}</button>`).join('');
+  $('#catRow').querySelectorAll('.cat').forEach(b => b.onclick = () => {
+    const id = b.dataset.c; S.settings.cats[id] = !S.settings.cats[id]; store.set('jeep.settings', S.settings);
+    renderCatRow(); renderThingMarkers(); renderSheet();
+    if (S.settings.cats[id] && map) searchThings(viewBounds(), [CAT[id]]);
+  });
+}
+
+/* ---------- nearby card while driving ---------- */
+function checkNearby(){
+  if (!S.pos || !TD.places.size) return showNear(null);
+  let best = null, bd = Infinity;
+  for (const t of TD.places.values()){
+    if (!S.settings.cats[t.cat] || TD.dismissed.has(t.id)) continue;
+    const d = dist(S.pos, t); if (d < bd){ bd = d; best = t; }
+  }
+  if (best && bd <= 200){ if (TD.near !== best){ TD.near = best; sfx.ding(); } showNear(best, bd); }
+  else showNear(null);
+}
+function showNear(t, d){
+  const el = $('#nearCard');
+  if (!t){ el.hidden = true; TD.near = null; return; }
+  el.hidden = false;
+  $('#nearIcon').textContent = CAT[t.cat].icon;
+  $('#nearName').textContent = t.name;
+  $('#nearDist').textContent = `${Math.round(d)} m · ${t.photos.length ? 'tap for photos' : 'tap for details'}`;
+}
+
+/* ---------- photo gallery ---------- */
+const GAL = { t:null, i:0 };
+function openGallery(t){
+  if (!t) return;
+  if (S.gear) setGear(0);                                   // stop the jeepney to look
+  GAL.t = t; GAL.i = 0; S.galleryOpen = true; engineUpdate();
+  $('#gallery').hidden = false;
+  $('#gName').textContent = `${CAT[t.cat] ? CAT[t.cat].icon + ' ' : ''}${t.name}`;
+  const d = S.pos ? fmtDist(dist(S.pos, t)) + ' away' : '';
+  $('#gSub').textContent = [t.type, d].filter(Boolean).join(' · ');
+  const maps = $('#gMaps'); maps.hidden = !t.url; if (t.url) maps.href = t.url;
+  $('#gRide').hidden = !!(S.pos && dist(S.pos, t) < 150);
+  $('#gDots').innerHTML = t.photos.slice(0, 10).map((_, i) => `<span data-i="${i}"></span>`).join('');
+  showGalleryPhoto(0);
+}
+function showGalleryPhoto(i){
+  const t = GAL.t, n = Math.min(10, t.photos.length), img = $('#gImg');
+  if (!n){ img.removeAttribute('src'); img.hidden = true; $('#gNone').hidden = false; $('#gAttr').textContent = ''; $('#gPrev').hidden = $('#gNext').hidden = true; return; }
+  GAL.i = (i + n) % n; img.hidden = false; $('#gNone').hidden = true;
+  $('#gPrev').hidden = $('#gNext').hidden = n < 2;
+  const ph = t.photos[GAL.i];
+  $('#gLoading').hidden = false;
+  img.onload = () => { $('#gLoading').hidden = true; };
+  img.onerror = () => { $('#gLoading').hidden = true; };
+  try{ img.src = ph.getURI ? ph.getURI({maxWidth:1200, maxHeight:1200}) : ph.uri; }catch(e){ console.warn(e); }
+  const a = (ph.authorAttributions || [])[0];
+  $('#gAttr').innerHTML = a ? `📷 ${a.uri ? `<a href="${esc(a.uri)}" target="_blank" rel="noopener">${esc(a.displayName || 'Google Maps user')}</a>` : esc(a.displayName || '')}` : '';
+  $('#gDots').querySelectorAll('span').forEach((s, k) => s.classList.toggle('on', k === GAL.i));
+}
+function closeGallery(){
+  $('#gallery').hidden = true; S.galleryOpen = false; GAL.t = null; $('#gImg').removeAttribute('src');
+  engineUpdate(); schedule(150);
+}
+(function gallerySwipe(){
+  const w = $('#gWrap'); let x0 = null;
+  w.addEventListener('pointerdown', e => { x0 = e.clientX; });
+  w.addEventListener('pointerup', e => { if (x0 == null) return; const dx = e.clientX - x0; x0 = null;
+    if (Math.abs(dx) > 40 && GAL.t) showGalleryPhoto(GAL.i + (dx < 0 ? 1 : -1)); });
+})();
+
+/* ---------- picking a place on the big map ---------- */
+function pickThing(t){
+  S.pick = {lat:t.lat, lng:t.lng, poi:true, name:t.name, thing:t};
+  updatePinMarkers(); renderSheet();
+}
+// tap on the big map: one of Google's own icons (fetch its name + photos) or any spot
+async function pickPlace(ll, placeId){
+  const pick = S.pick = {lat:ll.lat, lng:ll.lng, poi:!!placeId, name:null};
+  updatePinMarkers(); renderSheet();
+  if (placeId){
+    const t = await placeInfo(placeId, ll);
+    if (t && S.pick === pick){ pick.name = t.name; pick.thing = t; renderSheet(); }
+  }
+}
+async function placeInfo(id, ll){
+  if (TD.off) return null;
+  try{
+    const lib = await tdLib();
+    const pl = new lib.Place({id});
+    await pl.fetchFields({fields:['displayName', 'photos', 'googleMapsURI', 'primaryTypeDisplayName']});
+    return {id, name:pl.displayName || 'Place', cat:'sight', lat:ll.lat, lng:ll.lng, photos:pl.photos || [],
+            url:pl.googleMapsURI || '', type:pl.primaryTypeDisplayName || ''};
+  }catch(e){ tdFail(e); return null; }
+}
+const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;'}[c]));
+function closeInfoWindows(){ document.querySelectorAll('#map .gm-ui-hover-effect').forEach(b => { try{ b.click(); }catch(e){} }); }
 function openMap(){
   if (!map) return;
   bigOpen = true; document.body.classList.add('mapopen');
   map.setOptions({gestureHandling:'greedy', zoomControl:true, clickableIcons:true, mapTypeControl:true,
     mapTypeControlOptions:{position: google.maps.ControlPosition ? google.maps.ControlPosition.LEFT_BOTTOM : undefined}});
-  if (S.pos){ map.setCenter(S.pos); map.setZoom(14); }
-  renderSheet(); engineUpdate();
+  if (S.pos){ map.setCenter(S.pos); map.setZoom(13); }
+  renderCatRow(); renderSheet(); engineUpdate();
 }
 function closeMap(){
   if (!map) return;
   bigOpen = false; document.body.classList.remove('mapopen');
   S.pick = null; updatePinMarkers(); closeInfoWindows();
   map.setOptions({gestureHandling:'none', zoomControl:false, clickableIcons:false, mapTypeControl:false});
-  map.setZoom(16); if (S.pos) map.setCenter(S.pos);
+  map.setZoom(15); if (S.pos) map.setCenter(S.pos);
   engineUpdate(); schedule(100);
 }
-// tap on the big map: an attraction icon (Google shows its name) or any spot
-async function pickPlace(ll, placeId){
-  const pick = S.pick = {lat:ll.lat, lng:ll.lng, poi:!!placeId, name:null};
-  updatePinMarkers(); renderSheet();
-  if (placeId){
-    const name = await placeName(placeId);
-    if (name && S.pick === pick){ pick.name = name; renderSheet(); }
-  }
-}
-// optional nicety: the attraction's name (needs "Places API (New)" on the key; otherwise Google's map label shows it)
-async function placeName(id){
-  if (placeName.off) return null;
-  try{
-    const lib = await google.maps.importLibrary('places');
-    const pl = new lib.Place({id}); await pl.fetchFields({fields:['displayName']});
-    return pl.displayName || null;
-  }catch(e){ placeName.off = true; console.info('Place names need the Places API (New); using map labels instead.'); return null; }
-}
-const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;'}[c]));
-function closeInfoWindows(){ document.querySelectorAll('#map .gm-ui-hover-effect').forEach(b => { try{ b.click(); }catch(e){} }); }
-async function rideToPick(){
-  const t = S.pick; if (!t) return;
+async function rideTo(t){
+  if (!t) return;
   toast('🚙 Finding the nearest street with Street View…', 2500);
   let ok = false;
   try{ ok = await jumpTo(t); }catch(e){ if (e.message === 'AUTH') return showAuthError(); }
@@ -1050,28 +1261,35 @@ async function rideToPick(){
   S.dest = {lat:t.lat, lng:t.lng, reached:false, name:t.name}; S.pick = null;
   const d = dist(S.pos, S.dest);
   if (d <= 120) S.dest.reached = true;
-  updatePinMarkers(); faceToward(S.dest); setGear(0); closeMap(); updateHud();
+  updatePinMarkers(); faceToward(S.dest); setGear(0); if (bigOpen) closeMap(); updateHud();
   toast(d > 120 ? `📍 Nearest street is ${fmtKm(d/1000)} away – the arrow at the top points to the place. Press ▲ GAS`
                 : '📍 You\'re there! Press ▲ GAS to explore around', 5000);
 }
+const rideToPick = () => rideTo(S.pick);
 function renderSheet(){
   let h;
   if (S.pick){
-    const d = S.pos ? fmtKm(dist(S.pos, S.pick)/1000) + ' from you' : '';
-    const title = S.pick.name ? '⭐ ' + esc(S.pick.name) : S.pick.poi ? '⭐ Place selected' : '📍 Spot selected';
-    h = `<div class="pick"><div><b>${title}</b>
-           <div class="note">${S.pick.poi && !S.pick.name ? 'Its name is shown on the map. ' : ''}${d}</div></div>
-         <button class="big-btn" id="rideBtn">🚙 Ride here</button>
-         <button class="pill" id="pickX">✕</button></div>`;
+    const p = S.pick, t = p.thing;
+    const d = S.pos ? fmtDist(dist(S.pos, p)) + ' from you' : '';
+    const icon = t && CAT[t.cat] ? CAT[t.cat].icon : p.poi ? '⭐' : '📍';
+    const title = p.name ? esc(p.name) : p.poi ? 'Place selected' : 'Spot selected';
+    const sub = [t && t.type, d].filter(Boolean).join(' · ');
+    const nPh = t ? Math.min(10, t.photos.length) : 0;
+    h = `<div class="pick"><div><b>${icon} ${title}</b><div class="note">${esc(sub)}</div></div><button class="pill" id="pickX">✕</button></div>
+         <div class="pickBtns">${nPh ? `<button class="pill photoBtn" id="photoBtn">📷 Photos (${nPh})</button>` : ''}
+         <button class="big-btn" id="rideBtn">🚙 Ride here</button></div>`;
   } else {
-    h = `<div class="note"><b>Tap an attraction</b> (or any spot) on the map, then <b>🚙 Ride here</b>.<br>
-         ⭐ sights, parks &amp; churches · 🏪 shops, food &amp; hotels · 🔵 roads with Street View · yellow = where you've driven.</div>`;
+    const n = [...TD.places.values()].filter(t => S.settings.cats[t.cat]).length;
+    h = `<div class="note">${TD.off ? '⚠️ Turn on the <b>Places API (New)</b> for your key to see things to do and photos.<br>'
+         : `<b>${n}</b> things to do loaded. Tap a marker (or any spot), then <b>📷 Photos</b> or <b>🚙 Ride here</b>. Moved the map? <b>🔎 Search here</b>.<br>`}
+         🔵 roads with Street View · yellow = where you've driven.</div>`;
     if (S.dest) h += `<div class="pick" style="margin-top:8px"><div><b>★ ${S.dest.name ? esc(S.dest.name) : 'Destination'}</b><div class="note">${S.pos ? fmtKm(dist(S.pos, S.dest)/1000) + ' away' : ''}</div></div>
          <button class="pill" id="destShow">Show</button><button class="pill" id="destX">Clear</button></div>`;
   }
   $('#bigSheet').innerHTML = h;
   const on = (id, fn) => { const el = document.getElementById(id); if (el) el.onclick = fn; };
   on('rideBtn', rideToPick);
+  on('photoBtn', () => openGallery(S.pick && S.pick.thing));
   on('pickX', () => { S.pick = null; updatePinMarkers(); renderSheet(); });
   on('destShow', () => { map.panTo(S.dest); map.setZoom(16); });
   on('destX', () => { S.dest = null; updatePinMarkers(); renderSheet(); updateHud(); });
@@ -1625,7 +1843,8 @@ async function onStart(){
     setGear(0); updateHud(); updateBanner();
     applyMapStyle();
     toast(`${LOC().flag} ${LOC().startLabel}. Tap the map (top right) to pick an attraction, or press ▲ GAS`, 5000);
-    if (!S.settings.photo) setTimeout(() => { if (!S.settings.photo && !S.menuOpen)
+    const starts = (store.get('jeep.starts', 0) || 0) + 1; store.set('jeep.starts', starts);
+    if (!S.settings.photo && starts <= 2) setTimeout(() => { if (!S.settings.photo && !S.menuOpen && !S.galleryOpen)
       toast('Black screen instead of streets? Tap <b>☰</b> and switch on <b>📷 Photo mode</b>.', 6500); }, 8000);
     keepAwake(); schedule(200);
     if (S.settings.world) setWorld(true);
@@ -1664,8 +1883,15 @@ press($('#target'), openMap);
 press($('#mapHit'), openMap);
 press($('#closeMap'), closeMap);
 press($('#meBtn'), () => { if (S.pos){ map.panTo(S.pos); map.setZoom(15); } });
-press($('#fSights'), () => toggleMapFilter('mapSights'));
-press($('#fBiz'), () => toggleMapFilter('mapBiz'));
+press($('#searchBtn'), searchHere);
+press($('#nearCard'), e => {
+  if (e.target && e.target.id === 'nearX'){ if (TD.near) TD.dismissed.add(TD.near.id); showNear(null); return; }
+  openGallery(TD.near);
+});
+press($('#gClose'), closeGallery);
+press($('#gPrev'), () => showGalleryPhoto(GAL.i - 1));
+press($('#gNext'), () => showGalleryPhoto(GAL.i + 1));
+press($('#gRide'), () => { const t = GAL.t; closeGallery(); rideTo(t); });
 press($('#fRoads'), () => toggleMapFilter('mapRoads'));
 press($('#modeBtn'), () => setWorld(!W.on));
 press($('#menuBtn'), openMenu);
@@ -1712,6 +1938,7 @@ for (const [id, key] of [['#mSound', 'sound'], ['#mZoom', 'zoomFx']]){
 addEventListener('keydown', e => {
   if (!S.started || S.menuOpen) return;
   const k = e.key.toLowerCase(); let used = true;
+  if (S.galleryOpen && k !== 'escape'){ if (k === 'arrowleft') showGalleryPhoto(GAL.i - 1); else if (k === 'arrowright') showGalleryPhoto(GAL.i + 1); return; }
   if (k === 'arrowup' || k === 'w') setGear(S.gear + 1);
   else if (k === 'arrowdown') setGear(S.gear - 1);
   else if (k === 'arrowleft' || k === 'a') setBlinker(S.blinker === 'L' ? null : 'L');
@@ -1721,7 +1948,7 @@ addEventListener('keydown', e => {
   else if (k === 'u') uTurn();
   else if (k === 'm') bigOpen ? closeMap() : openMap();
   else if (k === 'v') setView(S.settings.view === 'chase' ? 'cab' : 'chase');
-  else if (k === 'escape'){ if (bigOpen) closeMap(); else openMenu(); }
+  else if (k === 'escape'){ if (S.galleryOpen) closeGallery(); else if (bigOpen) closeMap(); else openMenu(); }
   else used = false;
   if (used){ e.preventDefault(); audioInit(); }
 });

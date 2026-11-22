@@ -5,6 +5,7 @@ Explore the Philippines by jeepney before the trip: open the map, tap any attrac
 **Play:** https://alexcalex1.github.io/jeepney-ride/
 
 - ▲ GAS / ▼ BRAKE change gear, ◀ ▶ are turn signals (the jeepney turns at the next junction on that side), ↶ U-turn, tap the steering wheel to honk.
+- **Things to do:** beaches 🏖️, waterfalls 💧, hiking 🥾, sights ⭐, islands 🏝️, viewpoints 🌄 (+ museums, diving, food, hotels) from Google Places as map markers. Tap one for **📷 Photos** or **🚙 Ride here**. While riding, a card pops up when you pass one — tap it to stop and see photos. Needs **Places API (New)** on the key.
 - 🎥 / 🚐 switches between the **chase camera** (3D jeepney seen from behind) and the **cab view**.
 - Tap the map to see all Street View roads (blue) and where you've driven (yellow), and to jump to any road.
 
