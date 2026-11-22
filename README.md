@@ -1,21 +1,32 @@
 # Jeepney Ride
 
-Explore the Philippines by jeepney before the trip: open the map, tap any attraction and **🚙 Ride here** – in real Google Street View or Google's 3D world. Start points: **Manila (Intramuros)**, **Urdaneta, Pangasinan**, and **Iža, Slovakia**.
+Plan a trip by exploring it first: find beaches, waterfalls, hikes, islands and sights on the map, look at their photos, save them to the days of your trip, and ride there in real Google Street View (or Google's 3D world). Regions: **Metro Manila**, **Pangasinan** and **Iža, Slovakia**, or start anywhere by searching a town.
 
-**Play:** https://alexcalex1.github.io/jeepney-ride/
+**Open:** https://alexcalex1.github.io/jeepney-ride/
 
-- ▲ GAS / ▼ BRAKE change gear, ◀ ▶ are turn signals (the jeepney turns at the next junction on that side), ↶ U-turn, tap the steering wheel to honk.
-- **Things to do:** beaches 🏖️, waterfalls 💧, hiking 🥾, sights ⭐, islands 🏝️, viewpoints 🌄 (+ museums, diving, food, hotels) from Google Places as map markers. Tap one for **📷 Photos** or **🚙 Ride here**. While riding, a card pops up when you pass one — tap it to stop and see photos. Needs **Places API (New)** on the key.
-- **🧳 My trip:** tap ☆ Trip on any place, plan it by day, then open it as a **route in Google Maps**, make a **Google Maps list link** (Maps Tools Resolution API – enable *Maps Experience agent tools*), download a **.kml for Google My Maps** / .csv, or **share** the plan.
-- 🎥 / 🚐 switches between the **chase camera** (3D jeepney seen from behind) and the **cab view**.
-- Tap the map to see all Street View roads (blue) and where you've driven (yellow), and to jump to any road.
+Three tabs:
+
+- **Explore**: a full-screen map with search, category chips and a panel of place cards (swipe them, or switch to a list). After you move the map, **Search this area** appears. Tap a card, a pin or any Google place on the map to open its page. Long-press the map to drop a pin.
+- **Place page**: photos (swipe them, or tap to see them full screen) and **Ride there**, which starts about 700 m away and drives you in. **Look around** puts you right at the place. Tap a day to plan the place, and use **Directions** for real navigation in Google Maps. **Save in Maps** opens the place in Google Maps, where you can add it to your lists.
+- **Ride**: press play, pick Slow / Cruise / Fast, and switch between Street View, Chase and 3D.
+  - At a junction you get Left / Straight / Right buttons. The road toward your destination is highlighted and taken automatically after a short countdown.
+  - A card pops up when you pass something worth seeing — tap **Stop & look**.
+- **Trip**: your trip dates as a strip of days, numbered stops with distances (drag to reorder), **Route in Maps** for each day, and one **Share** button that shares the plan, opens a Google Maps list, or downloads a `.kml` (Google My Maps) or `.csv` file.
+
+Tap the region name on the map for settings: region, sound, card photos, Street View roads, Photo mode and trip dates.
+
+Keyboard: `Space` play/pause · `←` `↑` `→` pick a road · `↓` slower · `U` U-turn · `M` map / ride · `Esc` back.
 
 ## API key
 
-The game needs your own Google Maps JavaScript API key. It is typed into the page and stored only in your browser — it is not in this repo.
-Restrict the key to the website `https://alexcalex1.github.io/*` and to the Maps JavaScript API.
-Each press of **Start** uses one Dynamic Street View session.
+The app needs your own Google Maps API key. You type it into the page and it is stored only in your browser — it is not in this repo.
+Restrict the key to the website `https://alexcalex1.github.io/*`. Enable these APIs:
 
-**🌍 3D world (beta):** ☰ → 3D world drives smoothly through Google's Photorealistic 3D Tiles along the same real roads. Needs the **Map Tiles API** enabled for the key. Where Google has no 3D model you'll see flat satellite ground.
+- **Maps JavaScript API**
+- **Places API (New)**, for things to do, search and photos
+- **Street View Static API**, for Photo mode
+- **Map Tiles API**, for the 3D view
 
-**Black screen instead of streets?** Open ☰ and switch on **📷 Photo mode**. It shows Street View as plain pictures and needs the **Street View Static API** enabled for the same key (one image per hop).
+Street View is loaded once each time you open the app and ride. Each photo on a place card counts toward the Places photo quota; you can turn card photos off in settings.
+
+**Black screen instead of streets?** In settings, turn on **Photo mode**. It shows Street View as plain pictures and needs the Street View Static API.
