@@ -113,6 +113,23 @@ body.chase #nearCard,body.world #nearCard{bottom:calc(var(--dash-h) + 12px)}
 #gAttr{text-align:center;margin:6px 0} #gAttr a{color:#93c5fd}
 .gBtns{display:flex;gap:8px;align-items:center} .gBtns .big-btn{flex:1;margin:0;padding:13px;font-size:16px}
 .gBtns a{text-decoration:none;text-align:center;color:#fff} .gFoot{text-align:center;margin-top:6px;font-size:11px}
+#tripBtn{position:fixed;top:calc(env(safe-area-inset-top) + 6px);right:56px;height:40px;min-width:40px;padding:0 10px;border-radius:10px;z-index:9;
+  background:#a16207;border:1px solid #facc15;font-weight:800;font-size:15px}
+body.mapopen #tripBtn{display:none}
+#trip{z-index:57}
+.tripHead{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.tripHead h1{margin:0;font-size:24px}
+#tripTabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none}
+.tDay{margin:12px 0 4px;font-weight:900;color:#fde68a;letter-spacing:.04em}
+.tItem{display:flex;align-items:center;gap:8px;padding:8px;border-radius:12px;background:rgba(255,255,255,.06);margin:6px 0}
+.tItem .ti{font-size:24px} .tItem .tn{flex:1;min-width:0} .tItem .tn b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tItem select{background:#0f172a;color:#fde68a;border:1px solid #475569;border-radius:6px;padding:2px 4px;font-size:12px}
+.tBtns{display:flex;gap:3px;flex-wrap:wrap;justify-content:flex-end;max-width:132px}
+.tBtns button{width:40px;height:34px;border-radius:9px;background:#1e293b;border:1px solid #334155;font-size:15px}
+.tAct{display:block;width:100%;text-align:center;padding:13px;border-radius:12px;background:#1e3a8a;border:1px solid #60a5fa;color:#fff;
+  font-weight:800;font-size:15px;margin:6px 0;text-decoration:none}
+.tAct.gold{background:#a16207;border-color:#facc15}
+.tRow{display:flex;gap:6px} .tRow .tAct{margin:0}
 #wAttr{display:none;position:fixed;left:6px;right:6px;bottom:calc(var(--dash-h) + 4px);z-index:3;font-size:10px;color:#fff;
   text-shadow:0 1px 2px #000;pointer-events:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #wAttr b{font-size:13px;margin-right:6px}
@@ -195,7 +212,8 @@ body.mapopen #mapWrap{top:0;left:0;right:0;bottom:calc(27vh + env(safe-area-inse
 body.mapopen::before{content:"";position:fixed;inset:0;background:#0b1220;z-index:39}
 body.mapopen #mapHit,body.mapopen #mapLabel{display:none}
 #bigBar,#bigSheet{display:none}
-body.mapopen #bigBar{display:flex;position:fixed;top:calc(env(safe-area-inset-top) + 8px);left:8px;right:8px;gap:6px;z-index:41;flex-wrap:wrap}
+body.mapopen #bigBar{display:flex;position:fixed;top:calc(env(safe-area-inset-top) + 8px);left:0;right:0;padding:0 8px;gap:6px;z-index:42;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+body.mapopen #bigBar .pill{flex:none;padding:9px 11px}
 body.mapopen #bigSheet{display:block;position:fixed;left:8px;right:8px;bottom:calc(env(safe-area-inset-bottom) + 6px);z-index:41;
   height:27vh;overflow:auto;background:rgba(15,23,42,.92);border-radius:14px;padding:10px 12px;font-size:13px;
   border:1px solid #334155}
@@ -285,6 +303,7 @@ kbd{background:#1e293b;border:1px solid #475569;border-radius:5px;padding:0 5px;
 <button id="menuBtn" class="roofbtn" aria-label="Menu">☰</button>
 <button id="viewBtn" class="roofbtn" aria-label="Switch camera">🎥</button>
 <button id="modeBtn" aria-label="Switch between 3D world and Street View">🌍 3D world</button>
+<button id="tripBtn" aria-label="My trip">🧳</button>
 
 <!-- Cab overlay -->
 <div id="roof">
@@ -382,8 +401,9 @@ kbd{background:#1e293b;border:1px solid #475569;border-radius:5px;padding:0 5px;
 <div id="bigBar">
   <button class="pill" id="closeMap">✕ Back</button>
   <button class="pill" id="searchBtn">🔎 Search here</button>
+  <button class="pill" id="tripBtn2">🧳 Trip</button>
   <button class="pill" id="meBtn">⌖ Me</button>
-  <button class="pill" id="fRoads">🔵 SV roads</button>
+  <button class="pill" id="fRoads">🔵 Roads</button>
 </div>
 <div id="catRow"></div>
 <div id="bigSheet"></div>
@@ -396,7 +416,7 @@ kbd{background:#1e293b;border:1px solid #475569;border-radius:5px;padding:0 5px;
     <div id="gLoading">Loading photo…</div><button id="gPrev" aria-label="Previous photo">‹</button><button id="gNext" aria-label="Next photo">›</button></div>
   <div id="gDots"></div>
   <div id="gAttr" class="note"></div>
-  <div class="gBtns"><a id="gMaps" class="pill" target="_blank" rel="noopener">Open in Google Maps</a><button class="big-btn" id="gRide">🚙 Ride here</button></div>
+  <div class="gBtns"><button class="pill" id="gTrip">☆ Trip</button><a id="gMaps" class="pill" target="_blank" rel="noopener">Save in Google Maps ↗</a><button class="big-btn" id="gRide">🚙 Ride here</button></div>
   <div class="note gFoot">Photos &amp; place info: Google Maps</div>
 </div>
 
@@ -476,6 +496,19 @@ kbd{background:#1e293b;border:1px solid #475569;border-radius:5px;padding:0 5px;
     <button id="keyBtn">🔑 Change API key</button>
   </div>
   <p class="note" style="margin-top:14px">Tip: switching location inside the game reuses the same Street View session, so it doesn't count as a new one.</p>
+ </div>
+</div>
+
+<!-- ============ MY TRIP ============ -->
+<div id="trip" class="overlay" hidden>
+ <div class="wrapC">
+  <div class="tripHead"><h1>🧳 My trip</h1><button class="pill" id="tripClose">✕ Close</button></div>
+  <div id="tripTabs"></div>
+  <div id="tripList"></div>
+  <div id="tripActions"></div>
+  <p class="note" style="margin-top:12px">🗺 Route opens your stops as directions in the Google Maps app (phones take up to 5 stops per link, so longer days are split).
+   📋 makes one Google Maps link with all the places that you can save as a list. ⬇️ The .kml file can be imported into Google My Maps
+   (My Maps → Create map → Import) and then shows in the Google Maps app under Saved → Maps.</p>
  </div>
 </div>
 
@@ -568,7 +601,7 @@ const S = {
 };
 if (!LOCS[S.settings.loc]) S.settings.loc = 'manila';
 if (!S.settings.v2){ S.settings.zoomFx = false; S.settings.v2 = true; store.set('jeep.settings', S.settings); }   // motion effect now opt-in
-const paused = () => S.menuOpen || bigOpen || S.galleryOpen || document.hidden || !S.started;
+const paused = () => S.menuOpen || bigOpen || S.galleryOpen || S.tripOpen || document.hidden || !S.started;
 
 /* ---------- small UI helpers ---------- */
 let toastT;
@@ -682,7 +715,7 @@ async function initGoogle(){
   });
   coverage = new G.StreetViewCoverageLayer(); coverage.setMap(map);
   map.addListener('click', e => { if (bigOpen && e.latLng) pickPlace(e.latLng.toJSON(), e.placeId || null); });
-  applyMapStyle();
+  applyMapStyle(); renderTripMarkers();
 
   // looking around by dragging
   const markLook = () => { S.userLooking = true; clearTimeout(markLook.t); };
@@ -1068,7 +1101,7 @@ if (!S.settings.cats) S.settings.cats = Object.fromEntries(CATS.map(c => [c.id, 
 for (const c of CATS) if (!(c.id in S.settings.cats)) S.settings.cats[c.id] = c.on;
 const TD = { places:new Map(), markers:new Map(), off:false, lib:null, near:null, dismissed:new Set(), lastAuto:null, busy:0, warned:false };
 // Pro-tier fields only (name, location, photo references, Maps link) → "Text Search Pro"
-const TD_FIELDS = ['id', 'displayName', 'location', 'photos', 'googleMapsURI', 'primaryTypeDisplayName'];
+const TD_FIELDS = ['id', 'displayName', 'location', 'photos', 'googleMapsURI', 'primaryTypeDisplayName', 'formattedAddress'];
 const enabledCats = () => CATS.filter(c => S.settings.cats[c.id]);
 
 async function tdLib(){ if (!TD.lib) TD.lib = await google.maps.importLibrary('places'); return TD.lib; }
@@ -1086,7 +1119,7 @@ function addThing(p, c){
   if (!p || !p.id || !p.location || TD.places.has(p.id)) return false;
   const loc = p.location, lat = typeof loc.lat === 'function' ? loc.lat() : loc.lat, lng = typeof loc.lng === 'function' ? loc.lng() : loc.lng;
   TD.places.set(p.id, {id:p.id, name:p.displayName || c.name, cat:c.id, lat, lng, photos:p.photos || [],
-                       url:p.googleMapsURI || '', type:p.primaryTypeDisplayName || ''});
+                       url:p.googleMapsURI || '', type:p.primaryTypeDisplayName || '', addr:p.formattedAddress || ''});
   return true;
 }
 // search the given rectangle for every chosen category (one request per category)
@@ -1182,6 +1215,15 @@ function openGallery(t){
   $('#gSub').textContent = [t.type, d].filter(Boolean).join(' · ');
   const maps = $('#gMaps'); maps.hidden = !t.url; if (t.url) maps.href = t.url;
   $('#gRide').hidden = !!(S.pos && dist(S.pos, t) < 150);
+  $('#gTrip').textContent = inTrip(t) ? '★ In trip' : '☆ Trip';
+  $('#gMaps').textContent = 'Save in Google Maps ↗';
+  if (!t.photos.length && isPid(t.id) && !TD.off){
+    $('#gLoading').hidden = false; $('#gImg').hidden = true; $('#gNone').hidden = true;
+    tdLib().then(lib => { const pl = new lib.Place({id:t.id}); return pl.fetchFields({fields:['photos']}).then(() => pl); })
+      .then(pl => { t.photos = pl.photos || []; if (GAL.t === t){ $('#gDots').innerHTML = t.photos.slice(0, 10).map((_, i) => `<span data-i="${i}"></span>`).join(''); showGalleryPhoto(0); } })
+      .catch(e => { tdFail(e); if (GAL.t === t) showGalleryPhoto(0); });
+    return;
+  }
   $('#gDots').innerHTML = t.photos.slice(0, 10).map((_, i) => `<span data-i="${i}"></span>`).join('');
   showGalleryPhoto(0);
 }
@@ -1210,6 +1252,234 @@ function closeGallery(){
     if (Math.abs(dx) > 40 && GAL.t) showGalleryPhoto(GAL.i + (dx < 0 ? 1 : -1)); });
 })();
 
+/* =====================================================================
+   My trip – a list of places by day, with exports to Google Maps
+   ===================================================================== */
+const TRIP = { items: (store.get('jeep.trip', []) || []).filter(x => x && typeof x.lat === 'number'), tab:'all', lists:null, busy:false };
+const isPid = id => typeof id === 'string' && /^[A-Za-z0-9_-]{16,}$/.test(id);
+const tripId = t => t.id || `pt_${t.lat.toFixed(5)}_${t.lng.toFixed(5)}`;
+const inTrip = t => !!t && TRIP.items.some(x => x.id === tripId(t));
+const maxDay = () => TRIP.items.reduce((m, x) => Math.max(m, x.day || 1), 1);
+function saveTrip(){ store.set('jeep.trip', TRIP.items); updateTripBadge(); renderTripMarkers(); TRIP.lists = null; }
+function updateTripBadge(){
+  const n = TRIP.items.length;
+  $('#tripBtn').textContent = n ? `🧳 ${n}` : '🧳';
+  const b = $('#tripBtn2'); if (b) b.textContent = `🧳 Trip${n ? ' (' + n + ')' : ''}`;
+}
+function toggleTrip(t){
+  if (!t) return false;
+  const id = tripId(t), i = TRIP.items.findIndex(x => x.id === id);
+  if (i >= 0){ TRIP.items.splice(i, 1); toast('Removed from your trip', 1800); }
+  else {
+    const day = TRIP.tab === 'all' ? maxDay() : TRIP.tab;
+    TRIP.items.push({id, name:t.name || 'Place', cat:t.cat || 'sight', lat:t.lat, lng:t.lng, url:t.url || '', addr:t.addr || '', day, saved:Date.now()});
+    toast(`★ Added to your trip – Day ${day}`, 1800); sfx.ding();
+  }
+  saveTrip(); return i < 0;
+}
+const tripToThing = t => TD.places.get(t.id) || {id:t.id, name:t.name, cat:t.cat, lat:t.lat, lng:t.lng, photos:[], url:t.url, addr:t.addr, type:''};
+const placeLink = t => t.url || `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(t.lat.toFixed(6) + ',' + t.lng.toFixed(6))}` +
+                         (isPid(t.id) ? `&query_place_id=${encodeURIComponent(t.id)}` : '');
+
+let tripMks = [];
+function renderTripMarkers(){
+  if (!map || !G.Marker) return;
+  tripMks.forEach(m => m.setMap(null)); tripMks = [];
+  for (const t of TRIP.items){
+    const m = new G.Marker({map, position:{lat:t.lat, lng:t.lng}, title:`Day ${t.day} · ${t.name}`, zIndex:80,
+      icon:{path:google.maps.SymbolPath.CIRCLE, scale:13, fillColor:'#facc15', fillOpacity:1, strokeColor:'#7c2d12', strokeWeight:2},
+      label:{text:String(t.day || 1), fontSize:'12px', fontWeight:'800', color:'#422006'}});
+    m.addListener('click', () => { if (bigOpen) pickThing(tripToThing(t)); });
+    tripMks.push(m);
+  }
+}
+
+// the stops the action buttons work on: the selected day, or everything in day order
+function tripSelection(){
+  const items = TRIP.tab === 'all' ? TRIP.items.slice().sort((a, b) => (a.day || 1) - (b.day || 1)) : TRIP.items.filter(x => (x.day || 1) === TRIP.tab);
+  return items;
+}
+// Google Maps route links: phones accept at most 3 waypoints, so longer days become chained links of ≤5 stops
+function routeLinks(items){
+  const ll = t => `${t.lat.toFixed(6)},${t.lng.toFixed(6)}`, enc = encodeURIComponent;
+  if (!items.length) return [];
+  if (items.length === 1){
+    const t = items[0];
+    return [{label:`🗺 Directions to ${t.name}`, url:`https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=${enc(ll(t))}` + (isPid(t.id) ? `&destination_place_id=${enc(t.id)}` : '')}];
+  }
+  const out = [];
+  for (let s = 0; s < items.length - 1; s += 4){
+    const leg = items.slice(s, s + 5), o = leg[0], d = leg[leg.length - 1], mid = leg.slice(1, -1);
+    let u = `https://www.google.com/maps/dir/?api=1&travelmode=driving&origin=${enc(ll(o))}&destination=${enc(ll(d))}`;
+    if (isPid(o.id)) u += `&origin_place_id=${enc(o.id)}`;
+    if (isPid(d.id)) u += `&destination_place_id=${enc(d.id)}`;
+    if (mid.length){
+      u += `&waypoints=${enc(mid.map(ll).join('|'))}`;
+      if (mid.every(t => isPid(t.id))) u += `&waypoint_place_ids=${enc(mid.map(t => t.id).join('|'))}`;
+    }
+    out.push({label: items.length <= 5 ? `🗺 Route in Google Maps (${items.length} stops)` : `🗺 Route part ${out.length + 1}: stops ${s + 1}–${s + leg.length}`, url:u});
+  }
+  return out;
+}
+// "Save as a Google Maps list": Maps Tools Resolution API returns a link that opens the places as a list (max 20 per link)
+async function makeMapsLists(items){
+  const out = [];
+  for (let s = 0; s < items.length; s += 20){
+    const part = items.slice(s, s + 20);
+    const body = {queries: part.map(t => ({text: t.addr ? `${t.name}, ${t.addr}` : `${t.name} near ${t.lat.toFixed(5)},${t.lng.toFixed(5)}`}))};
+    const r = await fetch('https://mapstools.googleapis.com/v1:resolveNames?key=' + encodeURIComponent(S.key),
+                          {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(body)});
+    let j = {}; try{ j = await r.json(); }catch(e){}
+    if (!r.ok) throw new Error((j.error && j.error.message) || ('HTTP ' + r.status));
+    if (!j.saveToMapsUrl) throw new Error('Google could not match these places');
+    const ok = (j.results || []).filter(x => x && x.entity).length;
+    out.push({label: items.length > 20 ? `📋 Open list part ${out.length + 1} in Google Maps` : '📋 Open the list in Google Maps', url:j.saveToMapsUrl, ok, n:part.length});
+  }
+  return out;
+}
+async function onMakeLists(){
+  const items = tripSelection(); if (!items.length || TRIP.busy) return;
+  TRIP.busy = true; TRIP.listErr = null; renderTrip();
+  try{ TRIP.lists = await makeMapsLists(items); }
+  catch(e){
+    console.warn('resolveNames failed', e);
+    const m = String(e.message || e);
+    TRIP.listErr = /Failed to fetch|NetworkError|Load failed/i.test(m)
+      ? 'Google blocked this request from a web page. Use the My Maps file below instead.'
+      : /not been used|disabled|PERMISSION|403|not enabled/i.test(m)
+        ? 'Enable the “Maps Experience agent tools” API for your key in Google Cloud, then try again – or use the My Maps file below.'
+        : 'Could not make the list: ' + m;
+  }
+  TRIP.busy = false; renderTrip();
+}
+const xmlEsc = s => String(s).replace(/[<>&'"]/g, c => ({'<':'&lt;', '>':'&gt;', '&':'&amp;', "'":'&apos;', '"':'&quot;'}[c]));
+function tripKml(items){
+  const days = [...new Set(items.map(t => t.day || 1))].sort((a, b) => a - b);
+  let k = `<?xml version="1.0" encoding="UTF-8"?>\n<kml xmlns="http://www.opengis.net/kml/2.2"><Document><name>My trip – Jeepney Ride</name>\n`;
+  for (const d of days){
+    k += `<Folder><name>Day ${d}</name>\n`;
+    for (const t of items.filter(x => (x.day || 1) === d)){
+      const c = CAT[t.cat];
+      k += `<Placemark><name>${xmlEsc(t.name)}</name><description>${xmlEsc(`${c ? c.icon + ' ' + c.name + ' · ' : ''}Day ${d}${t.addr ? ' · ' + t.addr : ''} · ${placeLink(t)}`)}</description>` +
+           `<Point><coordinates>${t.lng.toFixed(6)},${t.lat.toFixed(6)},0</coordinates></Point></Placemark>\n`;
+    }
+    k += `</Folder>\n`;
+  }
+  return k + `</Document></kml>\n`;
+}
+function tripCsv(items){
+  const q = s => `"${String(s).replace(/"/g, '""')}"`;
+  return ['Name,Day,Category,Latitude,Longitude,Address,Google Maps']
+    .concat(items.map(t => [q(t.name), t.day || 1, q(CAT[t.cat] ? CAT[t.cat].name : ''), t.lat.toFixed(6), t.lng.toFixed(6), q(t.addr || ''), q(placeLink(t))].join(','))).join('\n');
+}
+function download(name, mime, text){
+  try{
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], {type:mime})); a.download = name;
+    document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 5000);
+  }catch(e){ toast('Download not possible here'); }
+}
+function tripText(items){
+  const days = [...new Set(items.map(t => t.day || 1))].sort((a, b) => a - b);
+  let s = 'My Philippines trip 🇵🇭 (planned with Jeepney Ride)\n';
+  for (const d of days){
+    s += `\nDay ${d}\n`;
+    items.filter(x => (x.day || 1) === d).forEach((t, i) => { s += `${i + 1}. ${CAT[t.cat] ? CAT[t.cat].icon + ' ' : ''}${t.name} – ${placeLink(t)}\n`; });
+  }
+  return s;
+}
+async function shareTrip(){
+  const items = tripSelection(); if (!items.length) return;
+  const text = tripText(items);
+  try{ if (navigator.share){ await navigator.share({title:'My trip', text}); return; } }catch(e){ if (e && e.name === 'AbortError') return; }
+  try{ await navigator.clipboard.writeText(text); toast('📋 Trip copied – paste it anywhere'); }
+  catch(e){ toast('Sharing is not available in this browser'); }
+}
+// Google lets apps keep coordinates for up to 30 days – refresh older saved stops from their place ID
+async function refreshOldStops(){
+  if (TD.off) return;
+  const old = TRIP.items.filter(t => isPid(t.id) && Date.now() - (t.saved || 0) > 25*864e5);
+  if (!old.length) return;
+  try{
+    const lib = await tdLib();
+    for (const t of old){ const pl = new lib.Place({id:t.id}); await pl.fetchFields({fields:['location']});
+      if (pl.location){ t.lat = pl.location.lat(); t.lng = pl.location.lng(); t.saved = Date.now(); } }
+    saveTrip();
+  }catch(e){ console.warn(e); }
+}
+
+function openTrip(){
+  if (!S.started) return;
+  S.tripOpen = true; $('#trip').hidden = false; engineUpdate();
+  if (TRIP.tab !== 'all' && TRIP.tab > maxDay()) TRIP.tab = 'all';
+  renderTrip(); refreshOldStops();
+}
+function closeTrip(){ S.tripOpen = false; $('#trip').hidden = true; engineUpdate(); schedule(150); }
+function renderTrip(){
+  const n = TRIP.items.length, days = maxDay();
+  const cnt = d => TRIP.items.filter(x => (x.day || 1) === d).length;
+  let tabs = `<button class="cat ${TRIP.tab === 'all' ? 'on' : ''}" data-tab="all">All (${n})</button>`;
+  for (let d = 1; d <= days; d++) tabs += `<button class="cat ${TRIP.tab === d ? 'on' : ''}" data-tab="${d}">Day ${d} (${cnt(d)})</button>`;
+  tabs += `<button class="cat" data-tab="new">＋ Day</button>`;
+  $('#tripTabs').innerHTML = tabs;
+
+  const sel = tripSelection();
+  let list = '';
+  if (!n) list = `<p class="note">Your trip is empty. Open the map or a photo gallery and tap <b>☆ Trip</b> on any place to add it.</p>`;
+  else if (!sel.length) list = `<p class="note">Nothing planned for Day ${TRIP.tab} yet. Switch to another day and move places here with the Day selector, or add new ones while this day is selected.</p>`;
+  let lastDay = null;
+  for (const t of sel){
+    if (TRIP.tab === 'all' && t.day !== lastDay){ lastDay = t.day; list += `<div class="tDay">Day ${t.day}</div>`; }
+    const c = CAT[t.cat], dd = S.pos ? fmtDist(dist(S.pos, t)) : '';
+    let opts = ''; for (let d = 1; d <= days + 1; d++) opts += `<option value="${d}" ${d === (t.day || 1) ? 'selected' : ''}>Day ${d}</option>`;
+    list += `<div class="tItem" data-id="${esc(t.id)}"><span class="ti">${c ? c.icon : '📍'}</span>
+      <div class="tn"><b>${esc(t.name)}</b><div class="note"><select class="tDaySel">${opts}</select> · ${dd}</div></div>
+      <div class="tBtns"><button data-a="up" aria-label="Move up">↑</button><button data-a="down" aria-label="Move down">↓</button>
+      <button data-a="photo" aria-label="Photos">📷</button><button data-a="ride" aria-label="Ride there">🚙</button><button data-a="del" aria-label="Remove">🗑</button></div></div>`;
+  }
+  $('#tripList').innerHTML = list;
+
+  let act = '';
+  if (sel.length){
+    const what = TRIP.tab === 'all' ? 'the whole trip' : `Day ${TRIP.tab}`;
+    act += `<div class="note" style="margin:4px 0 6px">For <b>${what}</b> (${sel.length} stop${sel.length === 1 ? '' : 's'}):</div>`;
+    for (const r of routeLinks(sel)) act += `<a class="tAct" href="${esc(r.url)}" target="_blank" rel="noopener">${esc(r.label)}</a>`;
+    if (TRIP.lists) for (const l of TRIP.lists) act += `<a class="tAct gold" href="${esc(l.url)}" target="_blank" rel="noopener">${esc(l.label)}${l.ok < l.n ? ` – ${l.ok}/${l.n} matched` : ''}</a>`;
+    else act += `<button class="tAct" id="tLists">${TRIP.busy ? '⏳ Asking Google…' : '📋 Save as a Google Maps list'}</button>`;
+    if (TRIP.listErr) act += `<div class="err">${esc(TRIP.listErr)}</div>`;
+    act += `<div class="tRow"><button class="tAct" id="tKml">⬇️ My Maps file (.kml)</button><button class="tAct" id="tCsv">⬇️ .csv</button></div>`;
+    act += `<button class="tAct" id="tShare">📤 Share / copy the plan</button>`;
+  }
+  $('#tripActions').innerHTML = act;
+
+  // wiring
+  $('#tripTabs').querySelectorAll('.cat').forEach(b => b.onclick = () => {
+    const v = b.dataset.tab;
+    TRIP.tab = v === 'all' ? 'all' : v === 'new' ? maxDay() + (cnt(maxDay()) ? 1 : 0) : +v;
+    TRIP.lists = null; TRIP.listErr = null; renderTrip();
+  });
+  $('#tripList').querySelectorAll('.tItem').forEach(row => {
+    const id = row.dataset.id, t = TRIP.items.find(x => x.id === id);
+    row.querySelector('.tDaySel').onchange = e => { t.day = +e.target.value; saveTrip(); renderTrip(); };
+    row.querySelectorAll('.tBtns button').forEach(b => b.onclick = () => {
+      const a = b.dataset.a;
+      if (a === 'del'){ TRIP.items = TRIP.items.filter(x => x !== t); saveTrip(); renderTrip(); }
+      else if (a === 'ride'){ closeTrip(); rideTo(tripToThing(t)); }
+      else if (a === 'photo') openGallery(tripToThing(t));
+      else {
+        const view = tripSelection().filter(x => (x.day || 1) === (t.day || 1)), k = view.indexOf(t), other = view[k + (a === 'up' ? -1 : 1)];
+        if (!other) return;
+        const i = TRIP.items.indexOf(t), j = TRIP.items.indexOf(other);
+        [TRIP.items[i], TRIP.items[j]] = [TRIP.items[j], TRIP.items[i]]; saveTrip(); renderTrip();
+      }
+    });
+  });
+  const on = (id, fn) => { const el = document.getElementById(id); if (el) el.onclick = fn; };
+  on('tLists', onMakeLists);
+  on('tKml', () => download('jeepney-trip.kml', 'application/vnd.google-earth.kml+xml', tripKml(sel)));
+  on('tCsv', () => download('jeepney-trip.csv', 'text/csv', tripCsv(sel)));
+  on('tShare', shareTrip);
+}
+
 /* ---------- picking a place on the big map ---------- */
 function pickThing(t){
   S.pick = {lat:t.lat, lng:t.lng, poi:true, name:t.name, thing:t};
@@ -1229,9 +1499,9 @@ async function placeInfo(id, ll){
   try{
     const lib = await tdLib();
     const pl = new lib.Place({id});
-    await pl.fetchFields({fields:['displayName', 'photos', 'googleMapsURI', 'primaryTypeDisplayName']});
+    await pl.fetchFields({fields:['displayName', 'photos', 'googleMapsURI', 'primaryTypeDisplayName', 'formattedAddress']});
     return {id, name:pl.displayName || 'Place', cat:'sight', lat:ll.lat, lng:ll.lng, photos:pl.photos || [],
-            url:pl.googleMapsURI || '', type:pl.primaryTypeDisplayName || ''};
+            url:pl.googleMapsURI || '', type:pl.primaryTypeDisplayName || '', addr:pl.formattedAddress || ''};
   }catch(e){ tdFail(e); return null; }
 }
 const esc = t => String(t).replace(/[&<>"]/g, c => ({'&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;'}[c]));
@@ -1277,6 +1547,7 @@ function renderSheet(){
     const nPh = t ? Math.min(10, t.photos.length) : 0;
     h = `<div class="pick"><div><b>${icon} ${title}</b><div class="note">${esc(sub)}</div></div><button class="pill" id="pickX">✕</button></div>
          <div class="pickBtns">${nPh ? `<button class="pill photoBtn" id="photoBtn">📷 Photos (${nPh})</button>` : ''}
+         <button class="pill" id="pickTrip">${inTrip(p.thing || p) ? '★ In trip' : '☆ Trip'}</button>
          <button class="big-btn" id="rideBtn">🚙 Ride here</button></div>`;
   } else {
     const n = [...TD.places.values()].filter(t => S.settings.cats[t.cat]).length;
@@ -1290,6 +1561,7 @@ function renderSheet(){
   const on = (id, fn) => { const el = document.getElementById(id); if (el) el.onclick = fn; };
   on('rideBtn', rideToPick);
   on('photoBtn', () => openGallery(S.pick && S.pick.thing));
+  on('pickTrip', () => { const p = S.pick; if (!p) return; toggleTrip(p.thing || {name:p.name || 'Spot', lat:p.lat, lng:p.lng, cat:p.poi ? 'sight' : 'view'}); renderSheet(); });
   on('pickX', () => { S.pick = null; updatePinMarkers(); renderSheet(); });
   on('destShow', () => { map.panTo(S.dest); map.setZoom(16); });
   on('destX', () => { S.dest = null; updatePinMarkers(); renderSheet(); updateHud(); });
@@ -1889,6 +2161,10 @@ press($('#nearCard'), e => {
   openGallery(TD.near);
 });
 press($('#gClose'), closeGallery);
+press($('#gTrip'), () => { if (!GAL.t) return; toggleTrip(GAL.t); $('#gTrip').textContent = inTrip(GAL.t) ? '★ In trip' : '☆ Trip'; if (S.tripOpen) renderTrip(); });
+press($('#tripBtn'), openTrip);
+press($('#tripBtn2'), () => { closeMap(); openTrip(); });
+press($('#tripClose'), closeTrip);
 press($('#gPrev'), () => showGalleryPhoto(GAL.i - 1));
 press($('#gNext'), () => showGalleryPhoto(GAL.i + 1));
 press($('#gRide'), () => { const t = GAL.t; closeGallery(); rideTo(t); });
@@ -1936,7 +2212,7 @@ for (const [id, key] of [['#mSound', 'sound'], ['#mZoom', 'zoomFx']]){
   });
 }
 addEventListener('keydown', e => {
-  if (!S.started || S.menuOpen) return;
+  if (!S.started || S.menuOpen || (S.tripOpen && !S.galleryOpen && e.key !== 'Escape')) return;
   const k = e.key.toLowerCase(); let used = true;
   if (S.galleryOpen && k !== 'escape'){ if (k === 'arrowleft') showGalleryPhoto(GAL.i - 1); else if (k === 'arrowright') showGalleryPhoto(GAL.i + 1); return; }
   if (k === 'arrowup' || k === 'w') setGear(S.gear + 1);
@@ -1948,7 +2224,7 @@ addEventListener('keydown', e => {
   else if (k === 'u') uTurn();
   else if (k === 'm') bigOpen ? closeMap() : openMap();
   else if (k === 'v') setView(S.settings.view === 'chase' ? 'cab' : 'chase');
-  else if (k === 'escape'){ if (S.galleryOpen) closeGallery(); else if (bigOpen) closeMap(); else openMenu(); }
+  else if (k === 'escape'){ if (S.galleryOpen) closeGallery(); else if (S.tripOpen) closeTrip(); else if (bigOpen) closeMap(); else openMenu(); }
   else used = false;
   if (used){ e.preventDefault(); audioInit(); }
 });
@@ -1972,8 +2248,7 @@ press($('#viewBtn'), () => W.on ? cycleWorldCam() : setView(S.settings.view === 
   $('#optSound').checked = S.settings.sound; $('#optZoom').checked = S.settings.zoomFx;
   $('#optPhoto').checked = S.settings.photo;
   $('#optChase').checked = S.settings.view === 'chase';
-  applyLocUI();
-  if ('speechSynthesis' in window) speechSynthesis.getVoices();
+  applyLocUI(); updateTripBadge();
 })();
 </script>
 </body>
