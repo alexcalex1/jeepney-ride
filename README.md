@@ -6,7 +6,7 @@ Plan a trip by exploring it first: find beaches, waterfalls, hikes, islands and 
 
 Three tabs:
 
-- **Explore**: a full-screen map with search, category chips and a panel of place cards (swipe them, or switch to a list). After you move the map, **Search this area** appears. Tap a card, a pin or any Google place on the map to open its page. Long-press the map to drop a pin.
+- **Explore**: a full-screen map with search, category chips and a panel of place cards (swipe them, or switch to a list). After you move the map, **Search this area** appears. **Tap any road** to get its name and a **Drive** button that starts the ride right there. Tap a card, a pin or any Google place on the map to open its page.
 - **Place page**: photos (swipe them, or tap to see them full screen) and **Ride there**, which starts about 700 m away and drives you in. **Look around** puts you right at the place. Tap a day to plan the place, and use **Directions** for real navigation in Google Maps. **Save in Maps** opens the place in Google Maps, where you can add it to your lists.
 - **Ride**: press play, pick Slow / Cruise / Fast, and switch between Street View, Chase and 3D.
   - At a junction you get Left / Straight / Right buttons. The road toward your destination is highlighted and taken automatically after a short countdown.

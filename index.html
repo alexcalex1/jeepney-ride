@@ -141,6 +141,15 @@ body:not(.tab-explore) #explore{display:none}
 #mapBtns button.on{color:var(--blue)}
 #mapBtns hr{border:0;height:1px;background:var(--line);margin:0 10px}
 body.sheet-list #mapBtns,body.sheet-list #searchArea{display:none}
+#spot{position:absolute;left:12px;right:12px;bottom:calc(var(--sheetH) + 12px);max-width:560px;margin:0 auto;height:72px;border-radius:22px;
+  display:flex;align-items:center;gap:6px;padding:0 6px 0 0;animation:rise .25s ease-out;color:var(--ink)}
+#spMain{flex:1;min-width:0;height:100%;display:flex;align-items:center;gap:12px;padding-left:12px;text-align:left}
+#spIc{flex:none;width:44px;height:44px;border-radius:14px;background:var(--yel);color:var(--yelInk);display:grid;place-items:center}
+#spot .tx small{color:var(--muted)}
+#spGo{flex:none;height:46px;padding:0 16px;border-radius:23px;background:var(--blue);color:#fff;font-size:15px;font-weight:650;display:flex;align-items:center;gap:6px;
+  box-shadow:0 6px 16px rgba(24,73,214,.3)}
+#spGo:disabled{opacity:.45;box-shadow:none}
+#spX{flex:none;width:36px;height:44px;display:grid;place-items:center;color:var(--muted)}
 #sheet{position:absolute;left:0;right:0;bottom:0;height:var(--sheetH);background:var(--bg);border-radius:24px 24px 0 0;
   box-shadow:0 -10px 30px rgba(14,26,36,.14);display:flex;flex-direction:column;transition:height .3s}
 #handle{align-self:center;width:80px;height:20px;display:grid;place-items:center;flex:none}
@@ -414,6 +423,11 @@ body.tab-trip #toast{top:auto;bottom:calc(var(--safeB) + 90px)}
     <button id="satBtn" aria-label="Satellite map"><i data-ico="layers"></i></button><hr>
     <button id="roadsBtn" aria-label="Show roads with Street View"><i data-ico="person"></i></button><hr>
     <button id="meBtn" aria-label="Show the jeepney"><i data-ico="nav"></i></button>
+  </div>
+  <div id="spot" class="lt" hidden>
+    <button id="spMain" aria-label="More about this spot"><span id="spIc"><i data-ico="jeep" data-s="22"></i></span><span class="tx"><b id="spT"></b><small id="spS"></small></span></button>
+    <button id="spGo" disabled aria-label="Drive here"><i data-ico="play" data-s="16"></i>Drive</button>
+    <button id="spX" aria-label="Close"><i data-ico="close" data-s="18"></i></button>
   </div>
   <section id="sheet" aria-label="Things to do">
     <button id="handle" aria-label="Show as list"><span></span></button>
@@ -2025,31 +2039,67 @@ function renderTripMarkers(){
 function setupMapEvents(){
   map.addListener('click', e => {
     if (!bigOpen || !e.latLng) return;
-    if (e.placeId){ if (e.stop) e.stop(); openPoi(e.placeId, e.latLng.toJSON()); }
+    if (e.placeId){ if (e.stop) e.stop(); closeSpot(); openPoi(e.placeId, e.latLng.toJSON()); return; }
+    pickSpot(e.latLng.toJSON());              // tap any road → "Drive here"
   });
-  // long-press (or right-click) anywhere drops a pin you can ride to
-  map.addListener('contextmenu', e => { if (bigOpen && e && e.latLng) dropPin(e.latLng.toJSON()); });
-  let proj = null;
-  if (google.maps.OverlayView){
-    const ov = new google.maps.OverlayView(); ov.onAdd = ov.onRemove = () => {}; ov.draw = () => { proj = ov.getProjection(); }; ov.setMap(map);
-  }
-  const el = $('#mapWrap'); let lp = null;
-  const cancel = () => { if (lp){ clearTimeout(lp.t); lp = null; } };
-  el.addEventListener('pointerdown', e => {
-    if (!bigOpen || !e.isPrimary || e.pointerType === 'mouse'){ cancel(); return; }
-    cancel();
-    const r = el.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
-    lp = {x:e.clientX, y:e.clientY, t:setTimeout(() => {
-      lp = null;
-      if (!proj || !proj.fromContainerPixelToLatLng) return;
-      const ll = proj.fromContainerPixelToLatLng(new google.maps.Point(x, y));
-      if (ll){ if (navigator.vibrate) navigator.vibrate(15); dropPin(ll.toJSON()); }
-    }, 650)};
-  }, true);
-  el.addEventListener('pointermove', e => { if (lp && Math.hypot(e.clientX - lp.x, e.clientY - lp.y) > 10) cancel(); }, true);
-  for (const n of ['pointerup', 'pointercancel']) el.addEventListener(n, cancel, true);
-  el.addEventListener('pointerdown', e => { if (!e.isPrimary) cancel(); }, true);
+  map.addListener('contextmenu', e => { if (bigOpen && e && e.latLng) pickSpot(e.latLng.toJSON()); });
   map.addListener('idle', onMapIdle);
+}
+/* ---------- tap a road on the map → drive there ---------- */
+const SPOT = {ll:null, road:null, mk:null, seq:0};
+function spotMarker(ll){
+  if (!map || !G.Marker) return;
+  if (!SPOT.mk) SPOT.mk = new G.Marker({map, position:ll, zIndex:95, clickable:false, icon:pinIcon('find')});
+  else { SPOT.mk.setPosition(ll); SPOT.mk.setMap(map); }
+}
+async function pickSpot(ll){
+  const seq = ++SPOT.seq;
+  SPOT.ll = ll; SPOT.road = null;
+  if (S.sheetMode === 'list') setSheetMode('cards');      // make room to see the map
+  spotMarker(ll);
+  $('#spot').hidden = false; $('#spGo').disabled = true;
+  $('#spT').textContent = 'Finding the nearest road…';
+  $('#spS').textContent = 'Roads with Street View are the blue lines';
+  let data = null;
+  try{ data = await findPano(ll, [40, 120, 350]); }catch(e){ if (e.message === 'AUTH') return showAuthError(); }
+  if (seq !== SPOT.seq) return;
+  if (!data || !data.location || !data.links || !data.links.length){
+    $('#spT').textContent = 'No Street View road here';
+    $('#spS').textContent = 'Tap closer to a blue line';
+    return;
+  }
+  const road = llOf(data.location.latLng) || ll;
+  SPOT.road = {lat:road.lat, lng:road.lng, name:String(data.location.description || '')};
+  spotMarker(road);
+  $('#spT').textContent = SPOT.road.name || 'Road with Street View';
+  const d = dist(ll, road);
+  $('#spS').textContent = d > 30 ? `Nearest road · ${fmtDist(d)} away` : S.pos ? `${fmtDist(dist(S.pos, road))} from the jeepney` : 'Street View road';
+  $('#spGo').disabled = false;
+}
+function closeSpot(){
+  SPOT.seq++; SPOT.road = null; $('#spot').hidden = true;
+  if (SPOT.mk) SPOT.mk.setMap(null);
+}
+async function driveSpot(){
+  const r = SPOT.road; if (!r) return;
+  closeSpot();
+  const seq = ++rideSeq;
+  await setTab('ride', true);
+  stop(); ensureView();
+  S.dest = null; updatePinMarkers(); renderTop(); renderJunction();
+  let ok = false;
+  try{ ok = await jumpTo(r); }catch(e){ if (e.message === 'AUTH') return showAuthError(); }
+  if (seq !== rideSeq) return;
+  if (!ok){ toast('Could not load Street View here', 3000); return; }
+  renderTop(); maybeWorld(); blackHint();
+  play();
+  toast(`Driving on <b>${esc(shortName(r.name || 'this road'))}</b> · pick roads at junctions`, 3000);
+}
+function spotDetails(){
+  const r = SPOT.road || SPOT.ll; if (!r) return;
+  const name = SPOT.road && SPOT.road.name ? SPOT.road.name : 'Dropped pin';
+  closeSpot();
+  openPlace({id:null, name, cat:'find', lat:r.lat, lng:r.lng, photos:[], url:'', type:SPOT.road ? 'Road' : 'Dropped pin', addr:`${r.lat.toFixed(5)}, ${r.lng.toFixed(5)}`});
 }
 function openMapBig(){
   if (!map) return;
@@ -2309,11 +2359,6 @@ async function openPoi(id, ll){
   else t.name = 'Place';
   t.loading = false; t.photosTried = true;
   if (P.t === t) renderPlace(true);
-}
-let lastDrop = 0;
-function dropPin(ll){
-  if (performance.now() - lastDrop < 900) return; lastDrop = performance.now();
-  openPlace({id:null, name:'Dropped pin', cat:'find', lat:ll.lat, lng:ll.lng, photos:[], url:'', type:'Dropped pin', addr:`${ll.lat.toFixed(5)}, ${ll.lng.toFixed(5)}`});
 }
 const directionsUrl = t => `https://www.google.com/maps/dir/?api=1&travelmode=driving&destination=${encodeURIComponent(t.lat.toFixed(6) + ',' + t.lng.toFixed(6))}` +
                            (isPid(t.id) ? `&destination_place_id=${encodeURIComponent(t.id)}` : '');
@@ -2705,6 +2750,7 @@ async function setTab(tab, noStart){
   document.querySelectorAll('#tabs .tab').forEach(b => { const on = b.dataset.tab === tab; b.classList.toggle('on', on); if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
   $('#trip').hidden = tab !== 'trip';
   closeActions();
+  if (tab !== 'explore') closeSpot();
   if (tab === 'ride'){
     closeMapBig();
     renderTop(); renderDock(); renderJunction(); updateViewBtn();
@@ -2743,7 +2789,7 @@ async function onStart(){
     applyMapStyle(); renderTripMarkers(); updateTripBadge();
     const q = $('#startQ').value.trim();
     whenMapReady(() => { if (q){ $('#xQ').value = q; findPlaces(q); } else searchHere(); });
-    toast(`<b>${esc(LOC().title)}</b> — tap a place to see photos and ride there`, 4000);
+    toast(`<b>${esc(LOC().title)}</b> — tap a road to drive, or a place for photos`, 4000);
     keepAwake();
   }catch(e){
     if (e.message === 'AUTH' || authFailed) showAuthError();
@@ -2780,6 +2826,9 @@ $('#xQ').addEventListener('input', () => { $('#xClear').hidden = !$('#xQ').value
 press($('#xClear'), () => clearFind());
 press($('#regionBtn'), openSettings);
 press($('#searchArea'), searchHere);
+press($('#spGo'), driveSpot);
+press($('#spMain'), spotDetails);
+press($('#spX'), closeSpot);
 press($('#satBtn'), () => { S.settings.sat = !S.settings.sat; saveSettings(); applyMapStyle(); });
 press($('#roadsBtn'), () => { S.settings.mapRoads = !S.settings.mapRoads; saveSettings(); applyMapStyle(); toast(S.settings.mapRoads ? 'Blue lines = roads with Street View' : 'Street View roads hidden', 1800); });
 press($('#meBtn'), () => { const p = S.pos || LOC().start; map.panTo(p); map.setZoom(Math.max(map.getZoom() || 13, 14)); });
